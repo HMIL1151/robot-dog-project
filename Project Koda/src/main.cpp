@@ -20,7 +20,7 @@ void setKinematicAngles(int angleA, int angleD) {
   servoA.write(servoAnglesA); // left (a)
 }
 
-void loop() {
+void jump() {
   setKinematicAngles(72, 106);
   delay(2000);
   setKinematicAngles(70, 139);
@@ -29,7 +29,10 @@ void loop() {
   delay(150);
   setKinematicAngles(70, 139);
   delay(1000);
+}
 
+void loop() {
+  jump();
 }
 
 
