@@ -20,7 +20,7 @@ curve_params = {
     'line': {'m': 0.4, 'c': -100, 'x_min': 0, 'x_max': 125},
     'circle': {'xc': 50, 'yc': -70, 'r': 30},
     'ellipse': {'xc': 50, 'yc': -70, 'a': 40, 'b': 20},
-    'half_flat_ellipse': {'xc': 70, 'yc': -100, 'a': 60, 'b': 50, 'flat_y': -90}
+    'half_flat_ellipse': {'xc': 23, 'yc': -120, 'a': 30, 'b': 40, 'flat_y': -90}
 }
 
 
@@ -175,8 +175,24 @@ else:
     matched_points = np.array(matched_points)
 
 print(f"Number of matched points: {len(matched_points)} (should equal number of curve step points: {len(curve_step_points)})")
-print("Matched points:")
-print(matched_points)
+
+# Print thetaA and thetaD for each matched point
+print("Matched points (thetaA, thetaD):")
+if len(matched_points) > 0:
+    # For each matched point, find the corresponding row in df_clean and print thetaA, thetaD
+    for pt in matched_points:
+        # If NaN, skip
+        if np.isnan(pt[0]) or np.isnan(pt[1]):
+            print("NaN, NaN")
+            continue
+        # Find the row in df_clean with matching x, y
+        match = df_clean[(np.isclose(df_clean['x'], pt[0], atol=1e-6)) & (np.isclose(df_clean['y'], pt[1], atol=1e-6))]
+        if not match.empty:
+            thetaA = match.iloc[0]['theta_a']
+            thetaD = match.iloc[0]['theta_d']
+            print(f"{thetaA}, {thetaD}")
+        else:
+            print("Not found")
 
 
 # Plot all points
