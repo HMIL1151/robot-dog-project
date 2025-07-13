@@ -36,14 +36,9 @@ struct CurveParams {
     float x0, y0, m, c, xc, yc, r, a, b;
 };
 
-// Direction for curve generation
-enum CurveDirection {
-    CLOCKWISE = 0,
-    COUNTERCLOCKWISE = 1
-};
-
-// Generate curve points with direction
-int generateCurvePoints(CurveType type, const CurveParams& params, Point* outPoints, int maxPoints, CurveDirection direction = CLOCKWISE);
+// Direction for curve generation: +1 for CCW, -1 for CW
+// Use sign of direction argument for all curve types
+int generateCurvePoints(CurveType type, const CurveParams& params, Point* outPoints, int maxPoints, int direction = 1);
 
 // Match curve points to lookup table
 int matchCurveToLookup(const Point* curvePoints, int curveCount, const LookupEntry* lookupTable, int lookupCount, ServoAngles* outAngles, int maxAngles);

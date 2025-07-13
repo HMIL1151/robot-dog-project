@@ -10,16 +10,16 @@ df = pd.read_csv('forward_kinematics_lookup.csv')
 
 # --- Curve definitions ---
 # Choose curve_type: 'vertical', 'line', 'circle', 'ellipse'
-curve_type = 'half_flat_ellipse'  # options: 'vertical', 'line', 'circle', 'ellipse'
+curve_type = 'ellipse'  # options: 'vertical', 'line', 'circle', 'ellipse'
 
 
 # Parameters for each curve type
 curve_params = {
-    'vertical': {'x0': 46, 'y_min': -20, 'y_max': -100},
-    'horizontal': {'y0': -100, 'x_min': 0, 'x_max': 100},
+    'vertical': {'x0': 50, 'y_min': -120, 'y_max': -60},
+    'horizontal': {'y0': -100, 'x_min': 20, 'x_max': 80},
     'line': {'m': 0.4, 'c': -100, 'x_min': 0, 'x_max': 125},
     'circle': {'xc': 50, 'yc': -70, 'r': 30},
-    'ellipse': {'xc': 50, 'yc': -70, 'a': 40, 'b': 20},
+    'ellipse': {'xc': 50, 'yc': -100, 'a': 30, 'b': 20},
     'half_flat_ellipse': {'xc': 23, 'yc': -120, 'a': 30, 'b': 40, 'flat_y': -90}
 }
 
