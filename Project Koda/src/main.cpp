@@ -5,14 +5,14 @@
 #include "GaitLookupTable.h"
 
 Servo servoD, servoA;
-int servoPin1 = 25;
-int servoPin2 = 26;
+int servoPinD = 25;
+int servoPinA = 27;
 
 
 
 void setup() {
-  servoD.attach(servoPin1);
-  servoA.attach(servoPin2);
+  servoD.attach(servoPinD);
+  servoA.attach(servoPinA);
   Serial.begin(115200);
 
 }
@@ -20,8 +20,8 @@ void setup() {
 
 
 void loop() {
-  servoA.write(79);   //79
-  servoD.write(130);  //130
+  servoA.write(111);   //79
+  servoD.write(50);  //130
 }
 
 
