@@ -13,8 +13,8 @@ such may have problems when running code multiple times.
 If you encounter issues, try resetting your board.
 """
 
-SPEED = 5           # The speed that the LEDs will cycle at
-BRIGHTNESS = 0.4    # The brightness of the LEDs
+SPEED = 50           # The speed that the LEDs will cycle at
+BRIGHTNESS = 0.5    # The brightness of the LEDs
 UPDATES = 50        # How many times the LEDs will be updated per second
 
 # Create the LED bar, using PIO 1 and State Machine 0

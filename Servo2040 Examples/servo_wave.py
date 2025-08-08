@@ -25,7 +25,7 @@ gc.collect()
 
 # Create a servo cluster for pins 0 to 7, using PIO 0 and State Machine 0
 START_PIN = servo2040.SERVO_1
-END_PIN = servo2040.SERVO_8
+END_PIN = servo2040.SERVO_2
 servos = ServoCluster(pio=0, sm=0, pins=list(range(START_PIN, END_PIN + 1)))
 
 # Create the LED bar, using PIO 1 and State Machine 0
