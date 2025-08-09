@@ -1,9 +1,58 @@
 import math
 
+from enum import Enum
+
+class LegType(Enum):
+    FrontLeft = 1
+    FrontRight = 2
+    BackLeft = 3
+    BackRight = 4
 
 def inverse_kinematics(leg, x, y, z):
-    # Implement inverse kinematics calculations here
-    pass
+    last_servo_angles = leg.get_servo_values()
+    servo_angles = type('ServoAngles', (object,), {})()
+    servo_angles.hip = 0
+    servo_angles.left = 0
+    servo_angles.right = 0
+
+    foot_coords = (x, y)
+    foot_circle = (foot_coords, leg.tibia_length_mm)
+    servo1_coords = (-leg.servo_seperation_mm / 2, 0)
+    servo2_coords = (leg.servo_seperation_mm / 2, 0)
+    femur_circle_1 = (servo1_coords, leg.femur_length_mm)
+    femur_circle_2 = (servo2_coords, leg.femur_length_mm)
+
+    servo1_intersections = intersection_between_circles(foot_circle, femur_circle_1)
+    servo2_intersections = intersection_between_circles(foot_circle, femur_circle_2)
+
+    if servo1_intersections and servo2_intersections:
+        servo1_intersection_angles = (
+            clockwise_angle_between_two_lines(servo1_coords, foot_coords, servo1_intersections[0]),
+            counterclockwise_angle_between_two_lines(servo1_coords, foot_coords, servo1_intersections[1]))
+
+        servo2_intersection_angles = (
+            clockwise_angle_between_two_lines(servo2_coords, foot_coords, servo2_intersections[0]), 
+            counterclockwise_angle_between_two_lines(servo2_coords, foot_coords, servo2_intersections[1]))
+        
+        if servo1_intersection_angles[0] < 180:
+            servo1_intersection_point = servo1_intersections[1]
+        else:
+            servo1_intersection_point = servo1_intersections[0]
+
+        if servo2_intersection_angles[0] < 180:
+            servo2_intersection_point = servo2_intersections[0]
+        else:
+            servo2_intersection_point = servo2_intersections[1]
+
+        servo_angles.left = counterclockwise_angle_between_two_lines(servo2_coords, servo1_intersection_point, servo1_coords)
+        servo_angles.right = clockwise_angle_between_two_lines(servo1_coords, servo2_intersection_point, servo2_coords)
+
+    else:
+        servo_angles.left = last_servo_angles["left"]
+        servo_angles.right = last_servo_angles["right"]
+
+    return servo_angles
+
 
 def intersection_between_circles(circle1, circle2):
     # Unpack circle1 and circle2

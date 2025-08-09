@@ -7,3 +7,5 @@ from robot import Robot
 gc.collect()
 
 koda = Robot()
+
+koda.zero_robot()
