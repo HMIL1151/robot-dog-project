@@ -3,8 +3,8 @@ import helper
 
 class Leg:
     def __init__ (self, hipServoNum, tibiaServoNum, femurServoNum, legType):
-        self.femur_length_mm = 100
-        self.tibia_length_mm = 100
+        self.femur_length_mm = 40
+        self.tibia_length_mm = 150
         self.servo_seperation_mm = 46
         self.hip_servo = Servo(hipServoNum)
         self.left_servo = Servo(tibiaServoNum)
