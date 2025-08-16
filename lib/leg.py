@@ -1,6 +1,6 @@
-from hardware_imports import Servo
-import inverse_kinematics
-from robot import Robot
+from .hardware_imports import Servo
+from . import inverse_kinematics
+from .constants import ZERO_X, ZERO_Y, ZERO_Z
 
 
 class Leg:
@@ -14,7 +14,7 @@ class Leg:
         self.enable()
 
     def zero_position(self):
-        zero_angles = inverse_kinematics.inverse_kinematics((Robot.ZERO_X, Robot.ZERO_Y, Robot.ZERO_Z))
+        zero_angles = inverse_kinematics.inverse_kinematics((ZERO_X, ZERO_Y, ZERO_Z))
         self.hip_servo.value(zero_angles[0])
         self.left_servo.value(zero_angles[1])
         self.right_servo.value(zero_angles[2])
@@ -35,7 +35,7 @@ class Leg:
         self.right_servo.value((servo_angles[2] - self.servo_offset) * self.right_servo_direction)
 
         servo_set_angles = self.get_servo_values()
-        print("Setting servos to ", servo_set_angles)
+        print("Setting servos to ", servo_set_angles["hip"], servo_set_angles["left"], servo_set_angles["right"])
 
     def get_servo_values(self):
         return {

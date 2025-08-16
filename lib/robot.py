@@ -1,14 +1,12 @@
+
 import time
-from leg import Leg
-from hardware_imports import Servo, ServoCluster, servo2040, ANGULAR, LINEAR, CONTINUOUS, Calibration
-from gait import Gait
+from .leg import Leg
+from .hardware_imports import Servo, ServoCluster, servo2040, ANGULAR, LINEAR, CONTINUOUS, Calibration
+from .gait import Gait
 import math
+from .constants import ZERO_X, ZERO_Y, ZERO_Z
 
 class Robot:
-    
-    ZERO_X = 0
-    ZERO_Y = 150
-    ZERO_Z = 95.5
 
     def __init__(self):
         self.front_left_leg = Leg(servo2040.SERVO_1, servo2040.SERVO_7, servo2040.SERVO_13)
@@ -24,9 +22,9 @@ class Robot:
 
     def zero_robot(self):
         self.front_left_leg.zero_position()
-        self.front_right_leg.zero_position()
-        self.rear_right_leg.zero_position()
-        self.rear_left_leg.zero_position()
+        # self.front_right_leg.zero_position()
+        # self.rear_right_leg.zero_position()
+        # self.rear_left_leg.zero_position()
         self.robot_zeroed = True
     
     def is_robot_zeroed(self):

@@ -1,5 +1,6 @@
 import numpy as np
-import inverse_kinematics
+from . import inverse_kinematics
+from .constants import ZERO_X, ZERO_Y, ZERO_Z
 
 class Gait:
     TRIANGULAR = 1
@@ -32,9 +33,9 @@ class Gait:
     @staticmethod
     def interpolate_triangular_gait(robot, speed):
         triangle_vertices = [
-            (Gait.TRIANGULAR_WIDTH / 2, Gait.TRIANGLE_BASE_Y, robot.ZERO_Z),
-            (-Gait.TRIANGULAR_WIDTH / 2, Gait.TRIANGLE_BASE_Y, robot.ZERO_Z),
-            (0, Gait.TRIANGLE_BASE_Y - Gait.TRIANGULAR_HEIGHT, robot.ZERO_Z)
+            (Gait.TRIANGULAR_WIDTH / 2, Gait.TRIANGLE_BASE_Y, ZERO_Z),
+            (-Gait.TRIANGULAR_WIDTH / 2, Gait.TRIANGLE_BASE_Y, ZERO_Z),
+            (0, Gait.TRIANGLE_BASE_Y - Gait.TRIANGULAR_HEIGHT, ZERO_Z)
         ]
 
         num_steps = Gait.STEPS_PER_SECOND * Gait.TRIANGULAR_WIDTH / speed

@@ -1,7 +1,7 @@
 import gc
-from robot import Robot
-from gait import Gait
-from units import Speed, Direction
+from lib.robot import Robot
+from lib.gait import Gait
+from lib.units import Speed, Direction
 
 gc.collect()
 
