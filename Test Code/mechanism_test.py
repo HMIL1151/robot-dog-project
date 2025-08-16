@@ -1,6 +1,9 @@
 import math
 import pygame
-import helper
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import inverse_kinematics
 
 pygame.init()
 
@@ -43,8 +46,8 @@ for x in range(-screen_width, screen_width, 2):
         foot_circle = (foot_coords, calf_length)
         thigh_circle_1 = (servo1_coords, thigh_length)
         thigh_circle_2 = (servo2_coords, thigh_length)
-        servo1_intersection_coords = helper.intersection_between_circles(foot_circle, thigh_circle_1)
-        servo2_intersection_coords = helper.intersection_between_circles(foot_circle, thigh_circle_2)
+        servo1_intersection_coords = inverse_kinematics.intersection_between_circles(foot_circle, thigh_circle_1)
+        servo2_intersection_coords = inverse_kinematics.intersection_between_circles(foot_circle, thigh_circle_2)
         if servo1_intersection_coords and servo2_intersection_coords:
             screen_coords = to_screen_coords(foot_coords)
             workspace_surface.set_at((int(screen_coords[0]), int(screen_coords[1])), (0, 100, 255, 80))
@@ -97,8 +100,8 @@ while running:
 
     foot_circle = (from_screen_coords(foot_display_coords), calf_length)
 
-    servo1_intersection_coords = helper.intersection_between_circles(foot_circle, thigh_circle_1)
-    servo2_intersection_coords = helper.intersection_between_circles(foot_circle, thigh_circle_2)
+    servo1_intersection_coords = inverse_kinematics.intersection_between_circles(foot_circle, thigh_circle_1)
+    servo2_intersection_coords = inverse_kinematics.intersection_between_circles(foot_circle, thigh_circle_2)
 
     if len(servo1_intersection_coords) == 0 or len(servo2_intersection_coords) == 0:
         mouse_x, mouse_y = last_mouse_coords
@@ -108,12 +111,12 @@ while running:
     if servo1_intersection_coords and servo2_intersection_coords:
 
         servo1_intersection_angles = (
-            helper.clockwise_angle_between_two_lines(servo1_coords, foot_coords, servo1_intersection_coords[0]),
-            helper.clockwise_angle_between_two_lines(servo1_coords, foot_coords, servo1_intersection_coords[1])
+            inverse_kinematics.clockwise_angle_between_two_lines(servo1_coords, foot_coords, servo1_intersection_coords[0]),
+            inverse_kinematics.clockwise_angle_between_two_lines(servo1_coords, foot_coords, servo1_intersection_coords[1])
         )
         servo2_intersection_angles = (
-            helper.clockwise_angle_between_two_lines(servo2_coords, foot_coords, servo2_intersection_coords[0]),
-            helper.clockwise_angle_between_two_lines(servo2_coords, foot_coords, servo2_intersection_coords[1])
+            inverse_kinematics.clockwise_angle_between_two_lines(servo2_coords, foot_coords, servo2_intersection_coords[0]),
+            inverse_kinematics.clockwise_angle_between_two_lines(servo2_coords, foot_coords, servo2_intersection_coords[1])
         )
 
         if servo1_intersection_angles[0] < 180:
@@ -127,8 +130,8 @@ while running:
             servo2_intersection_point = servo2_intersection_coords[1]
 
 
-        servo1_angle = helper.counterclockwise_angle_between_two_lines(servo2_coords, servo1_intersection_point, servo1_coords)
-        servo2_angle = helper.clockwise_angle_between_two_lines(servo1_coords, servo2_intersection_point, servo2_coords)
+        servo1_angle = inverse_kinematics.counterclockwise_angle_between_two_lines(servo2_coords, servo1_intersection_point, servo1_coords)
+        servo2_angle = inverse_kinematics.clockwise_angle_between_two_lines(servo1_coords, servo2_intersection_point, servo2_coords)
 
         pygame.draw.line(screen, (255, 0, 0), to_screen_coords(servo1_intersection_point), foot_display_coords, 2)
         pygame.draw.line(screen, (255, 0, 0), to_screen_coords(servo2_intersection_point), foot_display_coords, 2)
@@ -136,7 +139,7 @@ while running:
         pygame.draw.line(screen, (0, 255, 0), servo1_screen_coords, to_screen_coords(servo1_intersection_point), 2)
         pygame.draw.line(screen, (0, 255, 0), servo2_screen_coords, to_screen_coords(servo2_intersection_point), 2)
 
-        print("Servo 1 Angle:", servo1_angle, "Servo 2 Angle:", servo2_angle)
+        print("Foot Coordinates:", foot_coords, "Servo 1 Angle:", servo1_angle, "Servo 2 Angle:", servo2_angle)
 
     pygame.draw.circle(screen, (0, 255, 0), foot_display_coords, foot_radius)
     pygame.draw.circle(screen, (0, 255, 0), foot_display_coords, calf_length, 1)

@@ -1,21 +1,24 @@
 import time
 from leg import Leg
-from servo import servo2040 # type: ignore
+from hardware_imports import Servo, ServoCluster, servo2040, ANGULAR, LINEAR, CONTINUOUS, Calibration
 from gait import Gait
 import math
 
 class Robot:
+    
+    ZERO_X = 0
+    ZERO_Y = 150
     ZERO_Z = 95.5
 
     def __init__(self):
         self.front_left_leg = Leg(servo2040.SERVO_1, servo2040.SERVO_7, servo2040.SERVO_13)
-        self.front_right_leg = Leg(servo2040.SERVO_2, servo2040.SERVO_8, servo2040.SERVO_14)
-        self.rear_right_leg = Leg(servo2040.SERVO_3, servo2040.SERVO_9, servo2040.SERVO_15)
-        self.rear_left_leg = Leg(servo2040.SERVO_4, servo2040.SERVO_10, servo2040.SERVO_16)
+        # self.front_right_leg = Leg(servo2040.SERVO_2, servo2040.SERVO_8, servo2040.SERVO_14)
+        # self.rear_right_leg = Leg(servo2040.SERVO_3, servo2040.SERVO_9, servo2040.SERVO_15)
+        # self.rear_left_leg = Leg(servo2040.SERVO_4, servo2040.SERVO_10, servo2040.SERVO_16)
         self.speed = None
         self.direction = None
         self.gait = None
-        self.is_robot_zeroed = False
+        self.robot_zeroed = False
         self.x = 0
         self.y = 0
 
@@ -24,10 +27,10 @@ class Robot:
         self.front_right_leg.zero_position()
         self.rear_right_leg.zero_position()
         self.rear_left_leg.zero_position()
-        self.is_robot_zeroed = True
+        self.robot_zeroed = True
     
     def is_robot_zeroed(self):
-        return self.is_robot_zeroed
+        return self.robot_zeroed
 
     def test_all(self):
         self.front_left_leg.test_all()
@@ -43,14 +46,17 @@ class Robot:
 
     def set_gait(self, gait):
         self.gait = gait
-        self.servo_positions = Gait.calculate_gait(self, gait)
+        try:
+            self.servo_positions = Gait.calculate_gait(self, gait, self.speed)
+        except Exception as e:
+            raise ValueError(f"Error occurred while calculating gait: {e}") from e
 
     def go(self):
         print("Robot is moving")
         if self.gait:
             for position in self.servo_positions:
-                self.front_left_leg.set_foot_position(position)
-                time.sleep(0.5)
+                self.front_left_leg.set_servo_angles(position)
+                time.sleep(0.1)
         else:
             print("No gait set")
 

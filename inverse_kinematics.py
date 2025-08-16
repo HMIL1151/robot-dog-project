@@ -6,9 +6,15 @@ def ik_on_path(path):
     for point in path:
         servo_pos = inverse_kinematics(point)
         servo_positions.append(servo_pos)
+        #print(f"Calculated servo positions for point {point}: {servo_pos}")
     return np.array(servo_positions)
 
-def inverse_kinematics(leg, x, y, z):
+def inverse_kinematics(point):
+    theta_h = None
+    servo1_angle = None
+    servo2_angle = None
+
+    x, y, z = point
     hip_to_leg_servo_midpoint_mm = 53.695
     hip_seperation_mm = 85
     foot_legservo_hipservo_theta = math.radians(102.31)
@@ -27,7 +33,7 @@ def inverse_kinematics(leg, x, y, z):
     if positive_roots.size == 0:
         raise ValueError("No positive roots found")
     y_prime = float(positive_roots[0])
-    print(f"y_prime: {y_prime:.2f}")
+    #print(f"y_prime: {y_prime:.2f}")
 
     v = math.sqrt(math.pow(y, 2) + math.pow(foot_to_hip_z_distance_mm, 2))
     if z < hip_seperation_mm/2:
@@ -49,7 +55,7 @@ def inverse_kinematics(leg, x, y, z):
     else:
         theta_h = 0
         
-    print(f"theta_h: {math.degrees(theta_h):.2f}")
+    #print(f"theta_h: {math.degrees(theta_h):.2f}")
 
     foot_coords = (x, y_prime)
     servo1_coords = (-servo_distance/2, 0)
@@ -86,10 +92,12 @@ def inverse_kinematics(leg, x, y, z):
         servo1_angle = counterclockwise_angle_between_two_lines(servo2_coords, servo1_intersection_point, servo1_coords)
         servo2_angle = clockwise_angle_between_two_lines(servo1_coords, servo2_intersection_point, servo2_coords)
 
-        print("Servo 1 Angle:", servo1_angle, "Servo 2 Angle:", servo2_angle)
+        #print("Servo 1 Angle:", servo1_angle, "Servo 2 Angle:", servo2_angle)
+    else:
+        raise ValueError("No Intersection Points")
 
-    servo_angles = (theta_h, servo1_angle, servo2_angle)
-
+    servo_angles = (int(theta_h), int(servo1_angle), int(servo2_angle))
+    
     return servo_angles
 
 

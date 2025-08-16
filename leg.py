@@ -1,25 +1,23 @@
-from servo import Servo # type: ignore
-import helper
+from hardware_imports import Servo
+import inverse_kinematics
+from robot import Robot
+
 
 class Leg:
     def __init__ (self, hipServoNum, tibiaServoNum, femurServoNum):
-        self.femur_length_mm = 40
-        self.tibia_length_mm = 150
-        self.servo_seperation_mm = 46
         self.hip_servo = Servo(hipServoNum)
         self.left_servo = Servo(tibiaServoNum)
         self.right_servo = Servo(femurServoNum)
+        self.left_servo_direction = 1
+        self.right_servo_direction = -1
+        self.servo_offset = 180
+        self.enable()
 
     def zero_position(self):
-        self.hip_servo.value(0)
-        self.left_servo.value(70)
-        self.right_servo.value(-70)
-
-    def test_all(self):
-        self.hip_servo.value(0)
-        self.left_servo.value(0)
-        self.right_servo.value(0)
-
+        zero_angles = inverse_kinematics.inverse_kinematics((Robot.ZERO_X, Robot.ZERO_Y, Robot.ZERO_Z))
+        self.hip_servo.value(zero_angles[0])
+        self.left_servo.value(zero_angles[1])
+        self.right_servo.value(zero_angles[2])
 
     def enable(self):
         self.hip_servo.enable()
@@ -31,11 +29,13 @@ class Leg:
         self.left_servo.disable()
         self.right_servo.disable()
 
-    def set_foot_position(self, servo_angles):
-        print(f"Setting servos to: {servo_angles}")
+    def set_servo_angles(self, servo_angles):
         self.hip_servo.value(servo_angles[0])
-        self.left_servo.value(servo_angles[1])
-        self.right_servo.value(servo_angles[2])
+        self.left_servo.value((servo_angles[1] - self.servo_offset) * self.left_servo_direction)
+        self.right_servo.value((servo_angles[2] - self.servo_offset) * self.right_servo_direction)
+
+        servo_set_angles = self.get_servo_values()
+        print("Setting servos to ", servo_set_angles)
 
     def get_servo_values(self):
         return {
