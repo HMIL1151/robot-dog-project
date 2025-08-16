@@ -1,4 +1,4 @@
-from servo import Servo
+from servo import Servo # type: ignore
 import helper
 
 class Leg:
@@ -31,11 +31,11 @@ class Leg:
         self.left_servo.disable()
         self.right_servo.disable()
 
-    def set_foot_position(self, x, y, z):
-        (servo_angles_hip, servo_angles_left, servo_angles_right) = helper.inverse_kinematics(self, x, y, z)
-        self.hip_servo.value(servo_angles_hip)
-        self.left_servo.value(servo_angles_left)
-        self.right_servo.value(servo_angles_right)
+    def set_foot_position(self, servo_angles):
+        print(f"Setting servos to: {servo_angles}")
+        self.hip_servo.value(servo_angles[0])
+        self.left_servo.value(servo_angles[1])
+        self.right_servo.value(servo_angles[2])
 
     def get_servo_values(self):
         return {

@@ -1,48 +1,94 @@
 import math
+import numpy as np
+
+def ik_on_path(path):
+    servo_positions = []
+    for point in path:
+        servo_pos = inverse_kinematics(point)
+        servo_positions.append(servo_pos)
+    return np.array(servo_positions)
 
 def inverse_kinematics(leg, x, y, z):
-    last_servo_angles = leg.get_servo_values()
-    servo_angles_hip = 0
-    servo_angles_left = 0
-    servo_angles_right = 0
+    hip_to_leg_servo_midpoint_mm = 53.695
+    hip_seperation_mm = 85
+    foot_legservo_hipservo_theta = math.radians(102.31)
+    servo_distance = 46
+    thigh_length = 40
+    calf_length = 150
 
-    foot_coords = (x, y)
-    foot_circle = (foot_coords, leg.tibia_length_mm)
-    servo1_coords = (-leg.servo_seperation_mm / 2, 0)
-    servo2_coords = (leg.servo_seperation_mm / 2, 0)
-    femur_circle_1 = (servo1_coords, leg.femur_length_mm)
-    femur_circle_2 = (servo2_coords, leg.femur_length_mm)
+    foot_to_hip_z_distance_mm = hip_seperation_mm/2 - z
 
-    servo1_intersections = intersection_between_circles(foot_circle, femur_circle_1)
-    servo2_intersections = intersection_between_circles(foot_circle, femur_circle_2)
+    b = -2*hip_to_leg_servo_midpoint_mm*math.cos(foot_legservo_hipservo_theta)
+    c = math.pow(hip_to_leg_servo_midpoint_mm, 2) - math.pow(y, 2) - math.pow(foot_to_hip_z_distance_mm, 2)
 
-    if servo1_intersections and servo2_intersections:
-        servo1_intersection_angles = (
-            clockwise_angle_between_two_lines(servo1_coords, foot_coords, servo1_intersections[0]),
-            counterclockwise_angle_between_two_lines(servo1_coords, foot_coords, servo1_intersections[1]))
+    roots = np.roots([1, b, c])
 
-        servo2_intersection_angles = (
-            clockwise_angle_between_two_lines(servo2_coords, foot_coords, servo2_intersections[0]), 
-            counterclockwise_angle_between_two_lines(servo2_coords, foot_coords, servo2_intersections[1]))
+    positive_roots = roots[roots > 0]
+    if positive_roots.size == 0:
+        raise ValueError("No positive roots found")
+    y_prime = float(positive_roots[0])
+    print(f"y_prime: {y_prime:.2f}")
+
+    v = math.sqrt(math.pow(y, 2) + math.pow(foot_to_hip_z_distance_mm, 2))
+    if z < hip_seperation_mm/2:
+        theta_a_prime = math.atan(y/foot_to_hip_z_distance_mm)
+    elif z > hip_seperation_mm/2:
+        theta_a_prime = math.atan((z-hip_seperation_mm/2)/y) + math.pi/2
+    else:
+        theta_a_prime = math.pi/2
+    theta_a_prime_prime = math.acos((math.pow(hip_to_leg_servo_midpoint_mm, 2) + math.pow(v, 2) - math.pow(y_prime, 2)) / (2*hip_to_leg_servo_midpoint_mm*v))
+    theta_a = theta_a_prime + theta_a_prime_prime
+
+    f = math.sqrt(math.pow(foot_to_hip_z_distance_mm, 2) + math.pow(hip_to_leg_servo_midpoint_mm, 2) - 2*hip_to_leg_servo_midpoint_mm*foot_to_hip_z_distance_mm*math.cos(theta_a))
+    theta_h = math.acos((math.pow(y, 2) + math.pow(y_prime, 2) - math.pow(f, 2)) / (2*y*y_prime))
+
+    if z > (hip_seperation_mm/2 + hip_to_leg_servo_midpoint_mm*math.sin(math.pi - foot_legservo_hipservo_theta)):
+        theta_h = -theta_h
+    elif z < (hip_seperation_mm/2 + hip_to_leg_servo_midpoint_mm*math.sin(math.pi - foot_legservo_hipservo_theta)):
+        theta_h = theta_h
+    else:
+        theta_h = 0
         
+    print(f"theta_h: {math.degrees(theta_h):.2f}")
+
+    foot_coords = (x, y_prime)
+    servo1_coords = (-servo_distance/2, 0)
+    servo2_coords = (servo_distance/2, 0)
+
+    foot_circle = (foot_coords, calf_length)
+    thigh_circle_1 = (servo1_coords, thigh_length)
+    thigh_circle_2 = (servo2_coords, thigh_length)
+
+    servo1_intersection_coords = intersection_between_circles(foot_circle, thigh_circle_1)
+    servo2_intersection_coords = intersection_between_circles(foot_circle, thigh_circle_2)
+
+    if servo1_intersection_coords and servo2_intersection_coords:
+
+        servo1_intersection_angles = (
+            clockwise_angle_between_two_lines(servo1_coords, foot_coords, servo1_intersection_coords[0]),
+            clockwise_angle_between_two_lines(servo1_coords, foot_coords, servo1_intersection_coords[1])
+        )
+        servo2_intersection_angles = (
+            clockwise_angle_between_two_lines(servo2_coords, foot_coords, servo2_intersection_coords[0]),
+            clockwise_angle_between_two_lines(servo2_coords, foot_coords, servo2_intersection_coords[1])
+        )
+
         if servo1_intersection_angles[0] < 180:
-            servo1_intersection_point = servo1_intersections[1]
+            servo1_intersection_point = servo1_intersection_coords[1]
         else:
-            servo1_intersection_point = servo1_intersections[0]
+            servo1_intersection_point = servo1_intersection_coords[0]
 
         if servo2_intersection_angles[0] < 180:
-            servo2_intersection_point = servo2_intersections[0]
+            servo2_intersection_point = servo2_intersection_coords[0]
         else:
-            servo2_intersection_point = servo2_intersections[1]
+            servo2_intersection_point = servo2_intersection_coords[1]
 
-        servo_angles_left = counterclockwise_angle_between_two_lines(servo2_coords, servo1_intersection_point, servo1_coords)
-        servo_angles_right = clockwise_angle_between_two_lines(servo1_coords, servo2_intersection_point, servo2_coords)
+        servo1_angle = counterclockwise_angle_between_two_lines(servo2_coords, servo1_intersection_point, servo1_coords)
+        servo2_angle = clockwise_angle_between_two_lines(servo1_coords, servo2_intersection_point, servo2_coords)
 
-    else:
-        servo_angles_left = last_servo_angles["left"]
-        servo_angles_right = last_servo_angles["right"]
+        print("Servo 1 Angle:", servo1_angle, "Servo 2 Angle:", servo2_angle)
 
-    servo_angles = (servo_angles_hip, servo_angles_left, servo_angles_right)
+    servo_angles = (theta_h, servo1_angle, servo2_angle)
 
     return servo_angles
 
