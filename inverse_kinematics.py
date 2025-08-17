@@ -1,13 +1,12 @@
 import math
-import numpy as np
 
 def ik_on_path(path):
     servo_positions = []
     for point in path:
         servo_pos = inverse_kinematics(point)
         servo_positions.append(servo_pos)
-        #print(f"Calculated servo positions for point {point}: {servo_pos}")
-    return np.array(servo_positions)
+        #print("Calculated servo positions for point {}: {}".format(point, servo_pos))
+    return servo_positions
 
 def inverse_kinematics(point):
     theta_h = None
@@ -27,13 +26,17 @@ def inverse_kinematics(point):
     b = -2*hip_to_leg_servo_midpoint_mm*math.cos(foot_legservo_hipservo_theta)
     c = math.pow(hip_to_leg_servo_midpoint_mm, 2) - math.pow(y, 2) - math.pow(foot_to_hip_z_distance_mm, 2)
 
-    roots = np.roots([1, b, c])
-
-    positive_roots = roots[roots > 0]
-    if positive_roots.size == 0:
+    # Solve quadratic equation x^2 + b*x + c = 0
+    discriminant = b**2 - 4*1*c
+    if discriminant < 0:
+        raise ValueError("No real roots found")
+    root1 = (-b + math.sqrt(discriminant)) / 2
+    root2 = (-b - math.sqrt(discriminant)) / 2
+    positive_roots = [r for r in (root1, root2) if r > 0]
+    if not positive_roots:
         raise ValueError("No positive roots found")
     y_prime = float(positive_roots[0])
-    #print(f"y_prime: {y_prime:.2f}")
+    #print("y_prime: {:.2f}".format(y_prime))
 
     v = math.sqrt(math.pow(y, 2) + math.pow(foot_to_hip_z_distance_mm, 2))
     if z < hip_seperation_mm/2:
@@ -109,7 +112,7 @@ def intersection_between_circles(circle1, circle2):
     # Calculate the distance between the centers
     dx = x2 - x1
     dy = y2 - y1
-    distance = math.hypot(dx, dy)
+    distance = math.sqrt(math.pow(dx, 2) + math.pow(dy, 2))
 
     intersection_coords = []
 
