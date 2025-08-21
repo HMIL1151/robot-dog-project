@@ -1,6 +1,8 @@
 import inverse_kinematics
 from constants import ZERO_X, ZERO_Y, ZERO_Z
+import bezier_curve
 import math
+
 
 class Gait:
     TRIANGULAR = 1
