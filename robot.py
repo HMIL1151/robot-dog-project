@@ -10,8 +10,8 @@ from units import Speed, Direction
 class Robot:
     FRONT_LEFT_LEG = 0
     FRONT_RIGHT_LEG = 1
-    REAR_LEFT_LEG = 2
-    REAR_RIGHT_LEG = 3
+    REAR_RIGHT_LEG = 2
+    REAR_LEFT_LEG = 3
 
     def __init__(self):
         self.front_left_leg = Leg(servo2040.SERVO_1, servo2040.SERVO_7, servo2040.SERVO_13)
@@ -55,11 +55,11 @@ class Robot:
 
     def set_gait(self, gait):
         self.gait = Gait(gait)
-        try:
-            self.servo_positions = self.gait.calculate_gait(self.speed)
-            self.start_indicies = self.gait.get_start_indices()
-        except Exception as e:
-            raise ValueError(f"Error occurred while calculating gait: {e}") from e
+        #try:
+        self.servo_positions = self.gait.calculate_gait(self.speed)
+        self.start_indicies = self.gait.get_start_indices()
+        #except Exception as e:
+           # raise ValueError(f"Error occurred while calculating gait: {e}") from e
 
     def go(self):
         print("Robot is moving")
@@ -99,9 +99,15 @@ class Robot:
 
     def manual_servo_control(self, servo_angles):
         self.front_left_leg.manual_servo_control(servo_angles)
-        self.front_right_leg.manual_servo_control(servo_angles)
-        self.rear_left_leg.manual_servo_control(servo_angles)
-        self.rear_right_leg.manual_servo_control(servo_angles)
+        # self.front_right_leg.manual_servo_control(servo_angles)
+        # self.rear_left_leg.manual_servo_control(servo_angles)
+        # self.rear_right_leg.manual_servo_control(servo_angles)
+
+    def manual_position_control(self, position):
+        self.front_left_leg.manual_position_control(position, 'left')
+        self.front_right_leg.manual_position_control(position, 'right')
+        self.rear_left_leg.manual_position_control(position, 'left')
+        self.rear_right_leg.manual_position_control(position, 'right')
 
     def deactivate_all_hips(self):
         self.front_left_leg.deactivate_hip()

@@ -1,4 +1,5 @@
 import math
+import constants
 
 def ik_points(points):
     return [inverse_kinematics(point) for point in points]
@@ -32,7 +33,7 @@ def inverse_kinematics(point):
     if not positive_roots:
         raise ValueError("No positive roots found")
     y_prime = float(positive_roots[0])
-    #print("y_prime: {:.2f}".format(y_prime))
+    print("y_prime: {:.2f}".format(y_prime))
 
     v = math.sqrt(math.pow(y, 2) + math.pow(foot_to_hip_z_distance_mm, 2))
     if z < hip_seperation_mm/2:
@@ -45,7 +46,12 @@ def inverse_kinematics(point):
     theta_a = theta_a_prime + theta_a_prime_prime
 
     f = math.sqrt(math.pow(foot_to_hip_z_distance_mm, 2) + math.pow(hip_to_leg_servo_midpoint_mm, 2) - 2*hip_to_leg_servo_midpoint_mm*foot_to_hip_z_distance_mm*math.cos(theta_a))
-    theta_h = math.acos((math.pow(y, 2) + math.pow(y_prime, 2) - math.pow(f, 2)) / (2*y*y_prime))
+
+    if z > constants.ZERO_Z - 0.1 and z < constants.ZERO_Z + 0.1:
+        theta_h = 0
+    else:
+        theta_h = math.acos((math.pow(y, 2) + math.pow(y_prime, 2) - math.pow(f, 2)) / (2*y*y_prime))
+
 
     if z > (hip_seperation_mm/2 + hip_to_leg_servo_midpoint_mm*math.sin(math.pi - foot_legservo_hipservo_theta)):
         theta_h = -theta_h
@@ -96,8 +102,8 @@ def inverse_kinematics(point):
         raise ValueError("No Intersection Points")
 
     servo_angles = (int(theta_h), int(servo1_angle), int(servo2_angle))
-    print(servo_angles)
-    
+    print("Servo angles for point {} : {}".format(foot_coords, servo_angles))
+
     return servo_angles
 
 

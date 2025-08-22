@@ -1,5 +1,8 @@
-from math import comb
+from math import factorial
 from constants import ZERO_X, ZERO_Y, ZERO_Z
+
+def binomial_coefficient(n, k):
+    return factorial(n) // (factorial(k) * factorial(n - k))
 
 def calculate_curve(step_length, step_height, delta, stance_steps, swing_steps):
 
@@ -24,7 +27,7 @@ def calculate_curve(step_length, step_height, delta, stance_steps, swing_steps):
         z = 0.0
         y = 0.0
         for i, P in enumerate(points):
-            binom = comb(n, i)
+            binom = binomial_coefficient(n, i)
             basis = binom * (1 - t) ** (n - i) * t ** i
             x += basis * P[0]
             y += basis * P[1]

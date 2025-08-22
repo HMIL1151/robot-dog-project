@@ -9,9 +9,9 @@ class Gait:
     TROT = 1
 
     STEPS_PER_SECOND = 10
-    STEP_HEIGHT = 20
+    STEP_HEIGHT = 10
     STEP_CURVE_DELTA = 0.2
-    STEP_DISTANCE = 50
+    STEP_DISTANCE = 30
 
     def __init__(self, gait_type):
         self.gait_type = gait_type
@@ -24,11 +24,11 @@ class Gait:
         self.swing_steps = int(self.stance_steps / 3)
         path_points = bezier_curve.calculate_curve(Gait.STEP_DISTANCE, Gait.STEP_HEIGHT, Gait.STEP_CURVE_DELTA, self.stance_steps, self.swing_steps)
         print("Path points:", path_points)
-        try:
-            servo_positions = inverse_kinematics.ik_points(path_points)
-            return servo_positions
-        except Exception as e:
-            raise ValueError("Error occurred during inverse kinematics: {}".format(e))
+        #try:
+        servo_positions = inverse_kinematics.ik_points(path_points)
+        return servo_positions
+    #except Exception as e:
+           # raise ValueError("Error occurred during inverse kinematics: {}".format(e))
 
     def get_start_indices(self):
         if self.gait_type == Gait.CRAWL:
