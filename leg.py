@@ -39,9 +39,6 @@ class Leg:
             self.left_servo.value((servo_angles[2] - self.servo_offset) * -self.left_servo_direction)
             self.right_servo.value((servo_angles[1] - self.servo_offset) * -self.right_servo_direction)
 
-        servo_set_angles = self.get_servo_values()
-        print("Setting servos to ", servo_set_angles["hip"], servo_set_angles["left"], servo_set_angles["right"])
-
     def get_servo_values(self):
         return {
             "hip": self.hip_servo.value(),

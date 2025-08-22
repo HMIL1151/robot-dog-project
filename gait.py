@@ -5,65 +5,38 @@ import math
 
 
 class Gait:
-    TRIANGULAR = 1
-    RECTANGULAR = 2
-    BEZIER = 3
+    CRAWL = 0
+    TROT = 1
 
-    TRIANGULAR_WIDTH = 60
-    TRIANGULAR_HEIGHT = 35
-    TRIANGLE_BASE_Y = 130
+    STEPS_PER_SECOND = 10
+    STEP_HEIGHT = 20
+    STEP_CURVE_DELTA = 0.2
+    STEP_DISTANCE = 50
 
-    STEPS_PER_SECOND = 20
+    def __init__(self, gait_type):
+        self.gait_type = gait_type
+        self.speed = None
+        self.stance_steps = None
+        self.swing_steps = None
 
-    @staticmethod
-    def calculate_gait(robot, gait_type, speed):
-        if gait_type == Gait.TRIANGULAR:
-            path =  Gait.interpolate_triangular_gait(robot, speed)
-        elif gait_type == Gait.RECTANGULAR:
-            path = Gait.interpolate_rectangular_gait()
-        elif gait_type == Gait.BEZIER:
-            path = Gait.interpolate_bezier_gait()
-        else:
-            raise ValueError("Invalid gait type")
+    def calculate_gait(self, speed):
+        self.stance_steps = int(Gait.STEPS_PER_SECOND * (Gait.STEP_DISTANCE / speed))
+        self.swing_steps = int(self.stance_steps / 3)
+        path_points = bezier_curve.calculate_curve(Gait.STEP_DISTANCE, Gait.STEP_HEIGHT, Gait.STEP_CURVE_DELTA, self.stance_steps, self.swing_steps)
+        print("Path points:", path_points)
         try:
-            servo_positions = inverse_kinematics.ik_on_path(path)
+            servo_positions = inverse_kinematics.ik_points(path_points)
             return servo_positions
         except Exception as e:
             raise ValueError("Error occurred during inverse kinematics: {}".format(e))
 
-    @staticmethod
-    def interpolate_triangular_gait(robot, speed):
-        triangle_vertices = [
-            (-Gait.TRIANGULAR_WIDTH / 2, Gait.TRIANGLE_BASE_Y, ZERO_Z),
-            (Gait.TRIANGULAR_WIDTH / 2, Gait.TRIANGLE_BASE_Y, ZERO_Z),
-            (0, Gait.TRIANGLE_BASE_Y + Gait.TRIANGULAR_HEIGHT, ZERO_Z)
-        ]
-
-        num_steps = int(Gait.STEPS_PER_SECOND * Gait.TRIANGULAR_WIDTH / speed)
-        points1 = Gait.interpolate_between_points(triangle_vertices[0], triangle_vertices[1], num_steps)
-        points2 = Gait.interpolate_between_points(triangle_vertices[1], triangle_vertices[2], num_steps//2)
-        points3 = Gait.interpolate_between_points(triangle_vertices[2], triangle_vertices[0], num_steps//2)
-        # Concatenate all but last point of each segment to avoid duplicates
-        path = points1[:-1] + points2[:-1] + points3
-        return path
-
-    @staticmethod
-    def interpolate_rectangular_gait():
-        return [[1, 1, 1]]
-
-    @staticmethod
-    def interpolate_bezier_gait():
-        return [[0, 0, 1]]
-
-    @staticmethod
-    def interpolate_between_points(p1, p2, num_points=10):
-        # Linear interpolation between two 3D points, returns a list of [x, y, z] points
-        num_points = int(num_points)
-        points = []
-        for n in range(num_points):
-            t = n / float(num_points - 1) if num_points > 1 else 0
-            x = p1[0] + (p2[0] - p1[0]) * t
-            y = p1[1] + (p2[1] - p1[1]) * t
-            z = p1[2] + (p2[2] - p1[2]) * t
-            points.append([x, y, z])
-        return points
+    def get_start_indices(self):
+        if self.gait_type == Gait.CRAWL:
+            return [0, 
+                    int(self.swing_steps + self.stance_steps/3), 
+                    int(self.swing_steps + 2*self.stance_steps/3), 
+                    int(self.swing_steps)]
+        elif self.gait_type == Gait.TROT:
+            return [0, 0, 0, 0]
+        else:
+            raise ValueError("Invalid gait type")

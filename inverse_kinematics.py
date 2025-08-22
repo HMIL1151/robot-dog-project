@@ -1,12 +1,7 @@
 import math
 
-def ik_on_path(path):
-    servo_positions = []
-    for point in path:
-        servo_pos = inverse_kinematics(point)
-        servo_positions.append(servo_pos)
-        #print("Calculated servo positions for point {}: {}".format(point, servo_pos))
-    return servo_positions
+def ik_points(points):
+    return [inverse_kinematics(point) for point in points]
 
 def inverse_kinematics(point):
     theta_h = None
@@ -14,12 +9,13 @@ def inverse_kinematics(point):
     servo2_angle = None
 
     x, y, z = point
-    hip_to_leg_servo_midpoint_mm = 53.695
+    #print("Solving for point: ({}, {}, {})".format(x, y, z))
+    hip_to_leg_servo_midpoint_mm = 53.863
     hip_seperation_mm = 85
-    foot_legservo_hipservo_theta = math.radians(102.31)
+    foot_legservo_hipservo_theta = math.radians(100.27)
     servo_distance = 46
-    thigh_length = 40
-    calf_length = 150
+    thigh_length = 30
+    calf_length = 120
 
     foot_to_hip_z_distance_mm = hip_seperation_mm/2 - z
 
@@ -100,6 +96,7 @@ def inverse_kinematics(point):
         raise ValueError("No Intersection Points")
 
     servo_angles = (int(theta_h), int(servo1_angle), int(servo2_angle))
+    print(servo_angles)
     
     return servo_angles
 
