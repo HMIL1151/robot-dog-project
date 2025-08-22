@@ -73,16 +73,20 @@ class Leg:
     def deactivate_hip(self):
         self.hip_servo.disable()
 
-    def kinematic_angles_to_servo_angles(self, kinematic_angles, side):
+    def kinematic_angles_to_servo_angles(self, kinematic_angles, side, face):
+        kinematic_angles = list(kinematic_angles)
         if side == 'left':
-            return [
-                kinematic_angles[0],
-                (kinematic_angles[2] - self.servo_offset) * self.left_servo_direction,
-                (kinematic_angles[1] - self.servo_offset) * self.right_servo_direction
-            ]
+            (kinematic_angles[2] - self.servo_offset) * self.left_servo_direction,
+            (kinematic_angles[1] - self.servo_offset) * self.right_servo_direction
         else:
-            return [
-                kinematic_angles[0],
-                (kinematic_angles[2] - self.servo_offset) * -self.left_servo_direction,
-                (kinematic_angles[1] - self.servo_offset) * -self.right_servo_direction
-            ]
+
+            (kinematic_angles[2] - self.servo_offset) * -self.left_servo_direction,
+            (kinematic_angles[1] - self.servo_offset) * -self.right_servo_direction
+
+
+        if (face == 'front' and side == 'left') or (face == 'rear' and side == 'right'):
+            kinematic_angles[0] = kinematic_angles[0]
+        else:
+            kinematic_angles[0] = -kinematic_angles[0]
+
+        return kinematic_angles

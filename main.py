@@ -4,11 +4,20 @@ from gait import Gait
 from units import Speed, Direction
 import time
 
-time.sleep(10)
+#time.sleep(10)
 
 gc.collect()
 
 koda = Robot()
+
+start_time = time.time()
+while time.time() - start_time < 5:
+   koda.set_carry_position()
+
+koda.stand()
+
+#outer 4 servos to kinematic 90°
+#inner 4 servos to kinematic 225°
 
 start_time = time.time()
 while time.time() - start_time < 15:

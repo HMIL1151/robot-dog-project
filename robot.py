@@ -4,7 +4,7 @@ from leg import Leg
 from hardware_imports import Servo, ServoCluster, servo2040, ANGULAR, LINEAR, CONTINUOUS, Calibration
 from gait import Gait
 import math
-from constants import ZERO_X, ZERO_Y, ZERO_Z
+from constants import ZERO_X, ZERO_Y, ZERO_Z, HIP_UP_ANGLE_DEG
 from units import Speed, Direction
 
 class Robot:
@@ -130,3 +130,46 @@ class Robot:
         print("Setting servos to ", front_left_positions, front_right_positions, rear_right_positions, rear_left_positions)
 
         time.sleep(0.05)
+
+    def set_carry_position(self):
+        self.front_left_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 240, 90), 'left')
+        self.rear_left_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 90, 240), 'left')
+        self.front_right_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 240, 90), 'right')
+        self.rear_right_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 90, 240), 'right')
+
+    def stand(self):
+        #go from carry position to hip angle 0 over a number of steps
+        steps = 10
+        angle_step = HIP_UP_ANGLE_DEG / steps
+        for step in range(steps):
+            self.front_left_leg.set_servo_angles((HIP_UP_ANGLE_DEG - step * angle_step, 240, 90), 'left')
+            self.rear_left_leg.set_servo_angles((HIP_UP_ANGLE_DEG - step * angle_step, 90, 240), 'left')
+            self.front_right_leg.set_servo_angles((HIP_UP_ANGLE_DEG - step * angle_step, 240, 90), 'right')
+            self.rear_right_leg.set_servo_angles((HIP_UP_ANGLE_DEG - step * angle_step, 90, 240), 'right')
+            time.sleep(0.1)
+
+        time.sleep(5)
+
+        # interpolate from current servo angles to (0, 180, 180) for all legs over a number of steps
+        target_angles = (0, 180, 180)
+        interp_steps = 15
+
+        # Get current angles for each leg
+        fl_current = (0, 240, 90)
+        fr_current = (0, 240, 90)
+        rl_current = (0, 90, 240)
+        rr_current = (0, 90, 240)
+
+        for step in range(1, interp_steps + 1):
+            ratio = step / interp_steps
+            fl_interp = tuple(fl_current[i] + (target_angles[i] - fl_current[i]) * ratio for i in range(3))
+            fr_interp = tuple(fr_current[i] + (target_angles[i] - fr_current[i]) * ratio for i in range(3))
+            rl_interp = tuple(rl_current[i] + (target_angles[i] - rl_current[i]) * ratio for i in range(3))
+            rr_interp = tuple(rr_current[i] + (target_angles[i] - rr_current[i]) * ratio for i in range(3))
+
+            self.front_left_leg.set_servo_angles(fl_interp, 'left')
+            self.front_right_leg.set_servo_angles(fr_interp, 'right')
+            self.rear_left_leg.set_servo_angles(rl_interp, 'left')
+            self.rear_right_leg.set_servo_angles(rr_interp, 'right')
+            time.sleep(0.1)
+        
