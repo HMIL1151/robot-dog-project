@@ -33,7 +33,7 @@ def inverse_kinematics(point):
     if not positive_roots:
         raise ValueError("No positive roots found")
     y_prime = float(positive_roots[0])
-    print("y_prime: {:.2f}".format(y_prime))
+    #print("y_prime: {:.2f}".format(y_prime))
 
     v = math.sqrt(math.pow(y, 2) + math.pow(foot_to_hip_z_distance_mm, 2))
     if z < hip_seperation_mm/2:
@@ -102,7 +102,7 @@ def inverse_kinematics(point):
         raise ValueError("No Intersection Points")
 
     servo_angles = (int(theta_h), int(servo1_angle), int(servo2_angle))
-    print("Servo angles for point {} : {}".format(foot_coords, servo_angles))
+    #print("Servo angles for point {} : {}".format(foot_coords, servo_angles))
 
     return servo_angles
 

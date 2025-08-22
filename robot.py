@@ -26,10 +26,10 @@ class Robot:
         self.y = 0
 
     def zero_robot(self):
-        self.front_left_leg.zero_position()
-        self.front_right_leg.zero_position()
-        self.rear_right_leg.zero_position()
-        self.rear_left_leg.zero_position()
+        self.front_left_leg.zero_position('left')
+        self.front_right_leg.zero_position('right')
+        self.rear_right_leg.zero_position('right')
+        self.rear_left_leg.zero_position('left')
         self.robot_zeroed = True
     
     def is_robot_zeroed(self):
