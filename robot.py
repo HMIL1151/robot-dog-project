@@ -4,7 +4,7 @@ from leg import Leg
 from hardware_imports import Servo, ServoCluster, servo2040, ANGULAR, LINEAR, CONTINUOUS, Calibration
 from gait import Gait
 import math
-from constants import ZERO_X, ZERO_Y, ZERO_Z, HIP_UP_ANGLE_DEG
+from constants import ZERO_X, ZERO_Y, ZERO_Z, HIP_UP_ANGLE_DEG, LEFT, RIGHT, FRONT, REAR
 from units import Speed, Direction
 import misc_functions
 import inverse_kinematics
@@ -16,10 +16,10 @@ class Robot:
     REAR_LEFT_LEG = 3
 
     def __init__(self):
-        self.front_left_leg = Leg(servo2040.SERVO_1, servo2040.SERVO_7, servo2040.SERVO_13)
-        self.front_right_leg = Leg(servo2040.SERVO_2, servo2040.SERVO_8, servo2040.SERVO_14)
-        self.rear_right_leg = Leg(servo2040.SERVO_3, servo2040.SERVO_9, servo2040.SERVO_15)
-        self.rear_left_leg = Leg(servo2040.SERVO_4, servo2040.SERVO_10, servo2040.SERVO_16)
+        self.front_left_leg = Leg(servo2040.SERVO_1, servo2040.SERVO_7, servo2040.SERVO_13, LEFT, FRONT)
+        self.front_right_leg = Leg(servo2040.SERVO_2, servo2040.SERVO_8, servo2040.SERVO_14, RIGHT, FRONT)
+        self.rear_right_leg = Leg(servo2040.SERVO_3, servo2040.SERVO_9, servo2040.SERVO_15, RIGHT, REAR)
+        self.rear_left_leg = Leg(servo2040.SERVO_4, servo2040.SERVO_10, servo2040.SERVO_16, LEFT, REAR)
         self.speed = None
         self.direction = None
         self.gait = None
@@ -28,10 +28,10 @@ class Robot:
         self.y = 0
 
     def zero_robot(self):
-        self.front_left_leg.zero_position('left')
-        self.front_right_leg.zero_position('right')
-        self.rear_right_leg.zero_position('right')
-        self.rear_left_leg.zero_position('left')
+        self.front_left_leg.zero_position()
+        self.front_right_leg.zero_position()
+        self.rear_right_leg.zero_position()
+        self.rear_left_leg.zero_position()
         self.robot_zeroed = True
     
     def is_robot_zeroed(self):
@@ -106,10 +106,10 @@ class Robot:
         self.rear_right_leg.manual_servo_control(servo_angles)
 
     def manual_position_control(self, position):
-        self.front_left_leg.manual_position_control(position, 'left', 'front')
-        self.front_right_leg.manual_position_control(position, 'right', 'front')
-        self.rear_left_leg.manual_position_control(position, 'left', 'rear')
-        self.rear_right_leg.manual_position_control(position, 'right', 'rear')
+        self.front_left_leg.manual_position_control(position)
+        self.front_right_leg.manual_position_control(position)
+        self.rear_left_leg.manual_position_control(position)
+        self.rear_right_leg.manual_position_control(position)
 
     def deactivate_all_hips(self):
         self.front_left_leg.deactivate_hip()
@@ -124,62 +124,68 @@ class Robot:
         rear_right_positions = self.servo_positions[(self.start_indicies[Robot.REAR_RIGHT_LEG] + step) % num_positions]
         rear_left_positions = self.servo_positions[(self.start_indicies[Robot.REAR_LEFT_LEG] + step) % num_positions]
 
-        self.front_left_leg.set_servo_angles(front_left_positions, 'left', 'front')
-        self.front_right_leg.set_servo_angles(front_right_positions, 'right', 'front')
-        self.rear_right_leg.set_servo_angles(rear_right_positions, 'right', 'rear')
-        self.rear_left_leg.set_servo_angles(rear_left_positions, 'left', 'rear')
+        self.front_left_leg.set_servo_angles(front_left_positions)
+        self.front_right_leg.set_servo_angles(front_right_positions)
+        self.rear_right_leg.set_servo_angles(rear_right_positions)
+        self.rear_left_leg.set_servo_angles(rear_left_positions)
 
         print("Setting servos to ", front_left_positions, front_right_positions, rear_right_positions, rear_left_positions)
 
         time.sleep(0.05)
 
     def set_carry_position(self):
-        self.front_left_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 240, 90), 'left', 'front')
-        self.rear_left_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 90, 240), 'left', 'rear')
-        self.front_right_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 240, 90), 'right', 'front')
-        self.rear_right_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 90, 240), 'right', 'rear')
+        self.front_left_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 240, 90))
+        self.rear_left_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 90, 240))
+        self.front_right_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 240, 90))
+        self.rear_right_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 90, 240))
 
     def stand(self):
-        stand_steps = 15
+        stand_steps = 30
 
-        front_left_servo_positions = misc_functions.interpolate_between_servo_positions((HIP_UP_ANGLE_DEG, 240, 90), (0, 180, 180), stand_steps)
-        rear_left_servo_positions = misc_functions.interpolate_between_servo_positions((HIP_UP_ANGLE_DEG, 90, 240), (0, 180, 180), stand_steps)
-        front_right_servo_positions = misc_functions.interpolate_between_servo_positions((HIP_UP_ANGLE_DEG, 240, 90), (0, 180, 180), stand_steps)
-        rear_right_servo_positions = misc_functions.interpolate_between_servo_positions((HIP_UP_ANGLE_DEG, 90, 240), (0, 180, 180), stand_steps)
+        #from hips up to hips level
+        print("Standing up")
+        front_left_servo_positions = misc_functions.interpolate_between_servo_positions((HIP_UP_ANGLE_DEG, 240, 90), (HIP_UP_ANGLE_DEG, 180, 180), stand_steps)
+        rear_left_servo_positions = misc_functions.interpolate_between_servo_positions((HIP_UP_ANGLE_DEG, 90, 240), (HIP_UP_ANGLE_DEG, 180, 180), stand_steps)
+        front_right_servo_positions = misc_functions.interpolate_between_servo_positions((HIP_UP_ANGLE_DEG, 240, 90), (HIP_UP_ANGLE_DEG, 180, 180), stand_steps)
+        rear_right_servo_positions = misc_functions.interpolate_between_servo_positions((HIP_UP_ANGLE_DEG, 90, 240), (HIP_UP_ANGLE_DEG, 180, 180), stand_steps)
 
         for step in range(stand_steps):
-            self.front_left_leg.set_servo_angles(front_left_servo_positions[step], 'left', 'front')
-            self.rear_left_leg.set_servo_angles(rear_left_servo_positions[step], 'left', 'rear')
-            self.front_right_leg.set_servo_angles(front_right_servo_positions[step], 'right', 'front')
-            self.rear_right_leg.set_servo_angles(rear_right_servo_positions[step], 'right', 'rear')
-            time.sleep(0.1)
+            self.front_left_leg.set_servo_angles(front_left_servo_positions[step])
+            self.rear_left_leg.set_servo_angles(rear_left_servo_positions[step])
+            self.front_right_leg.set_servo_angles(front_right_servo_positions[step])
+            self.rear_right_leg.set_servo_angles(rear_right_servo_positions[step])
+            time.sleep(0.05)
 
         time.sleep(5)
 
-        front_left_servo_positions = misc_functions.interpolate_between_servo_positions((0, 240, 90), (0, 180, 180), stand_steps)
-        rear_left_servo_positions = misc_functions.interpolate_between_servo_positions((0, 90, 240), (0, 180, 180), stand_steps)
-        front_right_servo_positions = misc_functions.interpolate_between_servo_positions((0, 240, 90), (0, 180, 180), stand_steps)
-        rear_right_servo_positions = misc_functions.interpolate_between_servo_positions((0, 90, 240), (0, 180, 180), stand_steps)
+        #move stand up crouched
+        print("Moving to crouched position")
+        front_left_servo_positions = misc_functions.interpolate_between_servo_positions((HIP_UP_ANGLE_DEG, 180, 180), (0, 180, 180), stand_steps)
+        rear_left_servo_positions = misc_functions.interpolate_between_servo_positions((HIP_UP_ANGLE_DEG, 180, 180), (0, 180, 180), stand_steps)
+        front_right_servo_positions = misc_functions.interpolate_between_servo_positions((HIP_UP_ANGLE_DEG, 180, 180), (0, 180, 180), stand_steps)
+        rear_right_servo_positions = misc_functions.interpolate_between_servo_positions((HIP_UP_ANGLE_DEG, 180, 180), (0, 180, 180), stand_steps)
 
         for i in range(stand_steps + 1):
-            self.front_left_leg.set_servo_angles(front_left_servo_positions[i], 'left', 'front')
-            self.rear_left_leg.set_servo_angles(rear_left_servo_positions[i], 'left', 'rear')
-            self.front_right_leg.set_servo_angles(front_right_servo_positions[i], 'right', 'front')
-            self.rear_right_leg.set_servo_angles(rear_right_servo_positions[i], 'right', 'rear')
-            time.sleep(0.1)
+            self.front_left_leg.set_servo_angles(front_left_servo_positions[i])
+            self.rear_left_leg.set_servo_angles(rear_left_servo_positions[i])
+            self.front_right_leg.set_servo_angles(front_right_servo_positions[i])
+            self.rear_right_leg.set_servo_angles(rear_right_servo_positions[i])
+            time.sleep(0.05)
 
         time.sleep(5)
 
-        front_left_servo_positions = misc_functions.interpolate_between_servo_positions((0, 180, 180), inverse_kinematics.inverse_kinematics(ZERO_X, ZERO_Y, ZERO_Z), stand_steps)
-        rear_left_servo_positions = misc_functions.interpolate_between_servo_positions((0, 180, 180), inverse_kinematics.inverse_kinematics(ZERO_X, ZERO_Y, ZERO_Z), stand_steps)
-        front_right_servo_positions = misc_functions.interpolate_between_servo_positions((0, 180, 180), inverse_kinematics.inverse_kinematics(ZERO_X, ZERO_Y, ZERO_Z), stand_steps)
-        rear_right_servo_positions = misc_functions.interpolate_between_servo_positions((0, 180, 180), inverse_kinematics.inverse_kinematics(ZERO_X, ZERO_Y, ZERO_Z), stand_steps)
+        #stand up straight
+        print("Standing up straight")
+        front_left_servo_positions = misc_functions.interpolate_between_servo_positions((0, 180, 180), inverse_kinematics.inverse_kinematics((ZERO_X, ZERO_Y, ZERO_Z)), stand_steps)
+        rear_left_servo_positions = misc_functions.interpolate_between_servo_positions((0, 180, 180), inverse_kinematics.inverse_kinematics((ZERO_X, ZERO_Y, ZERO_Z)), stand_steps)
+        front_right_servo_positions = misc_functions.interpolate_between_servo_positions((0, 180, 180), inverse_kinematics.inverse_kinematics((ZERO_X, ZERO_Y, ZERO_Z)), stand_steps)
+        rear_right_servo_positions = misc_functions.interpolate_between_servo_positions((0, 180, 180), inverse_kinematics.inverse_kinematics((ZERO_X, ZERO_Y, ZERO_Z)), stand_steps)
 
         for i in range(stand_steps + 1):
-            self.front_left_leg.set_servo_angles(front_left_servo_positions[i], 'left', 'front')
-            self.rear_left_leg.set_servo_angles(rear_left_servo_positions[i], 'left', 'rear')
-            self.front_right_leg.set_servo_angles(front_right_servo_positions[i], 'right', 'front')
-            self.rear_right_leg.set_servo_angles(rear_right_servo_positions[i], 'right', 'rear')
-            time.sleep(0.1)
+            self.front_left_leg.set_servo_angles(front_left_servo_positions[i])
+            self.rear_left_leg.set_servo_angles(rear_left_servo_positions[i])
+            self.front_right_leg.set_servo_angles(front_right_servo_positions[i])
+            self.rear_right_leg.set_servo_angles(rear_right_servo_positions[i])
+            time.sleep(0.05)
 
         time.sleep(5)

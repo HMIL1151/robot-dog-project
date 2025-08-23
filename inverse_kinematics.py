@@ -11,17 +11,17 @@ def inverse_kinematics(point):
 
     x, y, z = point
     #print("Solving for point: ({}, {}, {})".format(x, y, z))
-    hip_to_leg_servo_midpoint_mm = 53.863
-    hip_seperation_mm = 85
-    foot_legservo_hipservo_theta = math.radians(100.27)
-    servo_distance = 46
-    thigh_length = 30
-    calf_length = 120
+    a = constants.LEG_GEOMETRY_A_MM
+    hip_seperation_mm = constants.HIP_SEPERATION_MM
+    foot_legservo_hipservo_theta = math.radians(constants.LEG_GEOMETRY_THETA_DEG)
+    servo_distance = constants.SERVO_DISTANCE_MM
+    thigh_length = constants.THIGH_LENGTH_MM
+    calf_length = constants.CALF_LENGTH_MM
 
     foot_to_hip_z_distance_mm = hip_seperation_mm/2 - z
 
-    b = -2*hip_to_leg_servo_midpoint_mm*math.cos(foot_legservo_hipservo_theta)
-    c = math.pow(hip_to_leg_servo_midpoint_mm, 2) - math.pow(y, 2) - math.pow(foot_to_hip_z_distance_mm, 2)
+    b = -2*a*math.cos(foot_legservo_hipservo_theta)
+    c = math.pow(a, 2) - math.pow(y, 2) - math.pow(foot_to_hip_z_distance_mm, 2)
 
     # Solve quadratic equation x^2 + b*x + c = 0
     discriminant = b**2 - 4*1*c
@@ -42,10 +42,10 @@ def inverse_kinematics(point):
         theta_a_prime = math.atan((z-hip_seperation_mm/2)/y) + math.pi/2
     else:
         theta_a_prime = math.pi/2
-    theta_a_prime_prime = math.acos((math.pow(hip_to_leg_servo_midpoint_mm, 2) + math.pow(v, 2) - math.pow(y_prime, 2)) / (2*hip_to_leg_servo_midpoint_mm*v))
+    theta_a_prime_prime = math.acos((math.pow(a, 2) + math.pow(v, 2) - math.pow(y_prime, 2)) / (2*a*v))
     theta_a = theta_a_prime + theta_a_prime_prime
 
-    f = math.sqrt(math.pow(foot_to_hip_z_distance_mm, 2) + math.pow(hip_to_leg_servo_midpoint_mm, 2) - 2*hip_to_leg_servo_midpoint_mm*foot_to_hip_z_distance_mm*math.cos(theta_a))
+    f = math.sqrt(math.pow(foot_to_hip_z_distance_mm, 2) + math.pow(a, 2) - 2*a*foot_to_hip_z_distance_mm*math.cos(theta_a))
 
     if z > constants.ZERO_Z - 0.1 and z < constants.ZERO_Z + 0.1:
         theta_h = 0
@@ -53,9 +53,9 @@ def inverse_kinematics(point):
         theta_h = math.acos((math.pow(y, 2) + math.pow(y_prime, 2) - math.pow(f, 2)) / (2*y*y_prime))
 
 
-    if z > (hip_seperation_mm/2 + hip_to_leg_servo_midpoint_mm*math.sin(math.pi - foot_legservo_hipservo_theta)):
+    if z > (hip_seperation_mm/2 + a*math.sin(math.pi - foot_legservo_hipservo_theta)):
         theta_h = -theta_h
-    elif z < (hip_seperation_mm/2 + hip_to_leg_servo_midpoint_mm*math.sin(math.pi - foot_legservo_hipservo_theta)):
+    elif z < (hip_seperation_mm/2 + a*math.sin(math.pi - foot_legservo_hipservo_theta)):
         theta_h = theta_h
     else:
         theta_h = 0

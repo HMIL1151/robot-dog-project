@@ -4,7 +4,7 @@ from gait import Gait
 from units import Speed, Direction
 import time
 
-#time.sleep(10)
+time.sleep(5)
 
 gc.collect()
 
@@ -16,17 +16,9 @@ while time.time() - start_time < 5:
 
 koda.stand()
 
+koda.set_speed(Speed.in_mm_per_second(20))
+koda.set_direction(Direction.FORWARDS)
+koda.set_gait(Gait.CRAWL)
 
-
-# start_time = time.time()
-# while time.time() - start_time < 15:
-#    koda.zero_robot()
-
-
-# koda.set_speed(Speed.in_mm_per_second(20))
-# koda.set_direction(Direction.FORWARDS)
-# koda.set_gait(Gait.CRAWL)
-
-
-# koda.go_for_steps(20)
-# koda.disable()
+koda.go_for_steps(20)
+koda.disable()
