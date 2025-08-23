@@ -16,18 +16,17 @@ while time.time() - start_time < 5:
 
 koda.stand()
 
-#outer 4 servos to kinematic 90°
-#inner 4 servos to kinematic 225°
-
-start_time = time.time()
-while time.time() - start_time < 15:
-   koda.zero_robot()
 
 
-koda.set_speed(Speed.in_mm_per_second(20))
-koda.set_direction(Direction.FORWARDS)
-koda.set_gait(Gait.CRAWL)
+# start_time = time.time()
+# while time.time() - start_time < 15:
+#    koda.zero_robot()
 
 
-koda.go_for_steps(20)
-koda.disable()
+# koda.set_speed(Speed.in_mm_per_second(20))
+# koda.set_direction(Direction.FORWARDS)
+# koda.set_gait(Gait.CRAWL)
+
+
+# koda.go_for_steps(20)
+# koda.disable()

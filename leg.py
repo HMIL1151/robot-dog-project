@@ -34,8 +34,8 @@ class Leg:
         self.left_servo.disable()
         self.right_servo.disable()
 
-    def set_servo_angles(self, servo_angles, side):
-        servo_commands = self.kinematic_angles_to_servo_angles(servo_angles, side)
+    def set_servo_angles(self, servo_angles, side, face):
+        servo_commands = self.kinematic_angles_to_servo_angles(servo_angles, side, face)
 
         self.hip_servo.value(servo_commands[0])
         self.left_servo.value(servo_commands[1])
@@ -56,12 +56,12 @@ class Leg:
         self.left_servo.value(servo_angles[1])
         self.right_servo.value(servo_angles[2])
 
-    def manual_position_control(self, position, side):
+    def manual_position_control(self, position, side, face):
         servo_angles = inverse_kinematics.inverse_kinematics(position)
 
         print(servo_angles)
 
-        servo_commands = self.kinematic_angles_to_servo_angles(servo_angles, side)
+        servo_commands = self.kinematic_angles_to_servo_angles(servo_angles, side, face)
 
         self.hip_servo.value(servo_commands[0])
         self.left_servo.value(servo_commands[1])
