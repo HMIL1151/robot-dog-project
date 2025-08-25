@@ -1,7 +1,28 @@
 import math
-import numpy as np
+
 import matplotlib
 from matplotlib.widgets import Slider
+
+# --- Pure Python matrix/vector helpers ---
+def matmul3(a, b):
+    return [
+        [sum(a[i][k]*b[k][j] for k in range(3)) for j in range(3)]
+        for i in range(3)
+    ]
+
+def matvecmul3(m, v):
+    return [sum(m[i][j]*v[j] for j in range(3)) for i in range(3)]
+
+def transpose3(m):
+    return [[m[j][i] for j in range(3)] for i in range(3)]
+
+def vec_sub(a, b):
+    return [a[i] - b[i] for i in range(3)]
+
+def vec_add(a, b):
+    return [a[i] + b[i] for i in range(3)]
+
+import numpy as np
 
 leg_x_seperation_mm = 221.0
 foot_y_seperation_mm = 95.5*2
@@ -21,6 +42,7 @@ torso_length_x_mm = 367.4
 yaw_angle_deg = 0.0
 pitch_angle_deg = 0.0
 roll_angle_deg = 0.0
+
 
 yaw_rotation_matrix = np.array([
     [np.cos(np.radians(yaw_angle_deg)), -np.sin(np.radians(yaw_angle_deg)), 0],
@@ -58,7 +80,7 @@ def get_cuboid_vertices(center, dims, rot):
     dx = l/2
     dy = w/2
     dz = h/2
-    corners = np.array([
+    corners = [
         [ dx,  dy,  dz],
         [ dx, -dy,  dz],
         [-dx, -dy,  dz],
@@ -67,8 +89,8 @@ def get_cuboid_vertices(center, dims, rot):
         [ dx, -dy, -dz],
         [-dx, -dy, -dz],
         [-dx,  dy, -dz],
-    ])
-    rotated = (rot @ corners.T).T + center
+    ]
+    rotated = [vec_add(matvecmul3(rot, c), center) for c in corners]
     return rotated
 
 foot_points = np.array([
@@ -105,6 +127,18 @@ foot_points_torso = np.array([
     right_back_foot_coords_TORSO
 ])
 sc_feet_torso = ax.scatter(foot_points_torso[:,0], foot_points_torso[:,1], foot_points_torso[:,2], c='g', label='Feet (Torso Frame)', marker='o')
+
+def world_foot_coords_to_leg_foot_coords(coords, side, face):
+    x_world, y_world, z_world = coords
+
+    if face == 'front':
+        x_leg = (leg_x_seperation_mm / 2) - x_world
+    else:
+        x_leg = -(leg_x_seperation_mm / 2) - x_world
+    y_leg = torso_height_z_mm - z_world + 87.0
+    z_leg = abs(y_world)
+
+    return (x_leg, y_leg, z_leg)
 
 def get_rotation_matrix(yaw, pitch, roll):
     yaw_matrix = np.array([
@@ -150,12 +184,12 @@ ax_yaw = plt.axes([0.1, 0.18, 0.8, 0.03], facecolor=axcolor)
 ax_pitch = plt.axes([0.1, 0.13, 0.8, 0.03], facecolor=axcolor)
 ax_roll = plt.axes([0.1, 0.08, 0.8, 0.03], facecolor=axcolor)
 
-slider_yaw = Slider(ax_yaw, 'Yaw (deg)', -30, 30, valinit=yaw_angle_deg)
-slider_pitch = Slider(ax_pitch, 'Pitch (deg)', -30, 30, valinit=pitch_angle_deg)
-slider_roll = Slider(ax_roll, 'Roll (deg)', -30, 30, valinit=roll_angle_deg)
-
+slider_yaw = Slider(ax_yaw, 'Yaw (deg)', -10, 10, valinit=yaw_angle_deg, valstep=1)
+slider_pitch = Slider(ax_pitch, 'Pitch (deg)', -10, 10, valinit=pitch_angle_deg, valstep=1)
+slider_roll = Slider(ax_roll, 'Roll (deg)', -10, 10, valinit=roll_angle_deg, valstep=1)
 
 def update(val):
+
     yaw = slider_yaw.val
     pitch = slider_pitch.val
     roll = slider_roll.val
@@ -164,12 +198,23 @@ def update(val):
     draw_cuboid(ax, verts, edges, lines)
     # Update green dots for feet in torso frame, plotted in world frame
     foot_points_torso = (rot.T @ (foot_points - torso_point).T).T
+    foot_points_torso_world = foot_points_torso + torso_point  # offset to world frame
     sc_feet_torso._offsets3d = (
-        foot_points_torso[:,0] + torso_point[0],
-        foot_points_torso[:,1] + torso_point[1],
-        foot_points_torso[:,2] + torso_point[2]
+        foot_points_torso_world[:,0],
+        foot_points_torso_world[:,1],
+        foot_points_torso_world[:,2]
     )
     fig.canvas.draw_idle()
+
+    def fmt(coords):
+        return f"({coords[0]:.1f}, {coords[1]:.1f}, {coords[2]:.1f})"
+
+    front_left_leg_coords = world_foot_coords_to_leg_foot_coords(foot_points_torso_world[0], 'left', 'front')
+    front_right_leg_coords = world_foot_coords_to_leg_foot_coords(foot_points_torso_world[1], 'right', 'front')
+    back_left_leg_coords = world_foot_coords_to_leg_foot_coords(foot_points_torso_world[2], 'left', 'back')
+    back_right_leg_coords = world_foot_coords_to_leg_foot_coords(foot_points_torso_world[3], 'right', 'back')
+
+    print(f"Front Left: {fmt(front_left_leg_coords)}, Front Right: {fmt(front_right_leg_coords)}, Back Left: {fmt(back_left_leg_coords)}, Back Right: {fmt(back_right_leg_coords)}")
 
 slider_yaw.on_changed(update)
 slider_pitch.on_changed(update)
