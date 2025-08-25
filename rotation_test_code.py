@@ -1,5 +1,6 @@
 import math
 
+
 import matplotlib
 from matplotlib.widgets import Slider
 
@@ -22,8 +23,6 @@ def vec_sub(a, b):
 def vec_add(a, b):
     return [a[i] + b[i] for i in range(3)]
 
-import numpy as np
-
 leg_x_seperation_mm = 221.0
 foot_y_seperation_mm = 95.5*2
 torso_zero_height_mm = 135.0
@@ -42,32 +41,6 @@ torso_length_x_mm = 367.4
 yaw_angle_deg = 0.0
 pitch_angle_deg = 0.0
 roll_angle_deg = 0.0
-
-
-yaw_rotation_matrix = np.array([
-    [np.cos(np.radians(yaw_angle_deg)), -np.sin(np.radians(yaw_angle_deg)), 0],
-    [np.sin(np.radians(yaw_angle_deg)), np.cos(np.radians(yaw_angle_deg)), 0],
-    [0, 0, 1]
-])
-
-pitch_rotation_matrix = np.array([
-    [np.cos(np.radians(pitch_angle_deg)), 0, np.sin(np.radians(pitch_angle_deg))],
-    [0, 1, 0],
-    [-np.sin(np.radians(pitch_angle_deg)), 0, np.cos(np.radians(pitch_angle_deg))]
-])
-
-roll_rotation_matrix = np.array([
-    [1, 0, 0],
-    [0, np.cos(np.radians(roll_angle_deg)), -np.sin(np.radians(roll_angle_deg))],
-    [0, np.sin(np.radians(roll_angle_deg)), np.cos(np.radians(roll_angle_deg))]
-])
-
-rotation_matrix = yaw_rotation_matrix @ pitch_rotation_matrix @ roll_rotation_matrix
-
-left_front_foot_coords_TORSO = rotation_matrix.T @ (np.array(left_front_foot_coords_WORLD) - np.array(torso_origin_coords_WORLD))
-right_front_foot_coords_TORSO = rotation_matrix.T @ (np.array(right_front_foot_coords_WORLD) - np.array(torso_origin_coords_WORLD))
-left_back_foot_coords_TORSO = rotation_matrix.T @ (np.array(left_back_foot_coords_WORLD) - np.array(torso_origin_coords_WORLD))
-right_back_foot_coords_TORSO = rotation_matrix.T @ (np.array(right_back_foot_coords_WORLD) - np.array(torso_origin_coords_WORLD))
 
 # --- 3D Plotting of Robot Feet and Torso ---
 
@@ -93,13 +66,14 @@ def get_cuboid_vertices(center, dims, rot):
     rotated = [vec_add(matvecmul3(rot, c), center) for c in corners]
     return rotated
 
-foot_points = np.array([
-    left_front_foot_coords_WORLD,
-    right_front_foot_coords_WORLD,
-    left_back_foot_coords_WORLD,
-    right_back_foot_coords_WORLD
-])
-torso_point = np.array(torso_origin_coords_WORLD)
+
+foot_points = [
+    list(left_front_foot_coords_WORLD),
+    list(right_front_foot_coords_WORLD),
+    list(left_back_foot_coords_WORLD),
+    list(right_back_foot_coords_WORLD)
+]
+torso_point = list(torso_origin_coords_WORLD)
 torso_dims = (torso_length_x_mm, torso_width_y_mm, torso_height_z_mm)
 edges = [
     (0,1),(1,2),(2,3),(3,0),
@@ -114,19 +88,58 @@ fig = plt.figure(figsize=(8,8))
 ax = fig.add_subplot(111, projection='3d')
 plt.subplots_adjust(left=0.1, bottom=0.25)
 
+
+
+# --- Rotation matrix helpers (must be defined before use) ---
+def deg2rad(deg):
+    return deg * math.pi / 180.0
+
+def get_rotation_matrix(yaw, pitch, roll):
+    cy = math.cos(deg2rad(yaw))
+    sy = math.sin(deg2rad(yaw))
+    cp = math.cos(deg2rad(pitch))
+    sp = math.sin(deg2rad(pitch))
+    cr = math.cos(deg2rad(roll))
+    sr = math.sin(deg2rad(roll))
+    yaw_matrix = [
+        [cy, -sy, 0],
+        [sy,  cy, 0],
+        [ 0,   0, 1]
+    ]
+    pitch_matrix = [
+        [cp, 0, sp],
+        [ 0, 1,  0],
+        [-sp,0, cp]
+    ]
+    roll_matrix = [
+        [1, 0, 0],
+        [0, cr, -sr],
+        [0, sr, cr]
+    ]
+    return matmul3(matmul3(yaw_matrix, pitch_matrix), roll_matrix)
+
 # Initial plot
-sc_feet = ax.scatter(foot_points[:,0], foot_points[:,1], foot_points[:,2], c='b', label='Feet')
+sc_feet = ax.scatter(
+    [p[0] for p in foot_points],
+    [p[1] for p in foot_points],
+    [p[2] for p in foot_points],
+    c='b', label='Feet')
 sc_torso = ax.scatter([torso_point[0]], [torso_point[1]], [torso_point[2]], c='r', label='Torso', s=60)
 
 lines = []
 # Initial green dots for feet in torso frame
-foot_points_torso = np.array([
-    left_front_foot_coords_TORSO,
-    right_front_foot_coords_TORSO,
-    left_back_foot_coords_TORSO,
-    right_back_foot_coords_TORSO
-])
-sc_feet_torso = ax.scatter(foot_points_torso[:,0], foot_points_torso[:,1], foot_points_torso[:,2], c='g', label='Feet (Torso Frame)', marker='o')
+def get_initial_foot_points_torso():
+    # Use zero rotation for initial
+    rot = get_rotation_matrix(yaw_angle_deg, pitch_angle_deg, roll_angle_deg)
+    rotT = transpose3(rot)
+    return [matvecmul3(rotT, vec_sub(fp, torso_point)) for fp in foot_points]
+
+foot_points_torso = get_initial_foot_points_torso()
+sc_feet_torso = ax.scatter(
+    [p[0] + torso_point[0] for p in foot_points_torso],
+    [p[1] + torso_point[1] for p in foot_points_torso],
+    [p[2] + torso_point[2] for p in foot_points_torso],
+    c='g', label='Feet (Torso Frame)', marker='o')
 
 def world_foot_coords_to_leg_foot_coords(coords, side, face):
     x_world, y_world, z_world = coords
@@ -140,23 +153,33 @@ def world_foot_coords_to_leg_foot_coords(coords, side, face):
 
     return (x_leg, y_leg, z_leg)
 
+
+def deg2rad(deg):
+    return deg * math.pi / 180.0
+
 def get_rotation_matrix(yaw, pitch, roll):
-    yaw_matrix = np.array([
-        [np.cos(np.radians(yaw)), -np.sin(np.radians(yaw)), 0],
-        [np.sin(np.radians(yaw)), np.cos(np.radians(yaw)), 0],
-        [0, 0, 1]
-    ])
-    pitch_matrix = np.array([
-        [np.cos(np.radians(pitch)), 0, np.sin(np.radians(pitch))],
-        [0, 1, 0],
-        [-np.sin(np.radians(pitch)), 0, np.cos(np.radians(pitch))]
-    ])
-    roll_matrix = np.array([
+    cy = math.cos(deg2rad(yaw))
+    sy = math.sin(deg2rad(yaw))
+    cp = math.cos(deg2rad(pitch))
+    sp = math.sin(deg2rad(pitch))
+    cr = math.cos(deg2rad(roll))
+    sr = math.sin(deg2rad(roll))
+    yaw_matrix = [
+        [cy, -sy, 0],
+        [sy,  cy, 0],
+        [ 0,   0, 1]
+    ]
+    pitch_matrix = [
+        [cp, 0, sp],
+        [ 0, 1,  0],
+        [-sp,0, cp]
+    ]
+    roll_matrix = [
         [1, 0, 0],
-        [0, np.cos(np.radians(roll)), -np.sin(np.radians(roll))],
-        [0, np.sin(np.radians(roll)), np.cos(np.radians(roll))]
-    ])
-    return yaw_matrix @ pitch_matrix @ roll_matrix
+        [0, cr, -sr],
+        [0, sr, cr]
+    ]
+    return matmul3(matmul3(yaw_matrix, pitch_matrix), roll_matrix)
 
 def draw_cuboid(ax, vertices, edges, lines):
     # Remove old lines
@@ -188,8 +211,8 @@ slider_yaw = Slider(ax_yaw, 'Yaw (deg)', -10, 10, valinit=yaw_angle_deg, valstep
 slider_pitch = Slider(ax_pitch, 'Pitch (deg)', -10, 10, valinit=pitch_angle_deg, valstep=1)
 slider_roll = Slider(ax_roll, 'Roll (deg)', -10, 10, valinit=roll_angle_deg, valstep=1)
 
-def update(val):
 
+def update(val):
     yaw = slider_yaw.val
     pitch = slider_pitch.val
     roll = slider_roll.val
@@ -197,12 +220,13 @@ def update(val):
     verts = get_cuboid_vertices(torso_point, torso_dims, rot)
     draw_cuboid(ax, verts, edges, lines)
     # Update green dots for feet in torso frame, plotted in world frame
-    foot_points_torso = (rot.T @ (foot_points - torso_point).T).T
-    foot_points_torso_world = foot_points_torso + torso_point  # offset to world frame
+    rotT = transpose3(rot)
+    foot_points_torso = [matvecmul3(rotT, vec_sub(fp, torso_point)) for fp in foot_points]
+    foot_points_torso_world = [vec_add(fp, torso_point) for fp in foot_points_torso]
     sc_feet_torso._offsets3d = (
-        foot_points_torso_world[:,0],
-        foot_points_torso_world[:,1],
-        foot_points_torso_world[:,2]
+        [p[0] for p in foot_points_torso_world],
+        [p[1] for p in foot_points_torso_world],
+        [p[2] for p in foot_points_torso_world]
     )
     fig.canvas.draw_idle()
 

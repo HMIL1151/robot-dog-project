@@ -8,6 +8,7 @@ from constants import ZERO_X, ZERO_Y, ZERO_Z, HIP_UP_ANGLE_DEG, LEFT, RIGHT, FRO
 from units import Speed, Direction
 import misc_functions
 import inverse_kinematics
+import orientation
 
 class Robot:
     FRONT_LEFT_LEG = 0
@@ -244,3 +245,15 @@ class Robot:
 
         time.sleep(1)
 
+
+    def set_torso_orientation(self, yaw, pitch, roll):
+        self.torso_yaw = yaw
+        self.torso_pitch = pitch
+        self.torso_roll = roll
+
+        (front_left_leg_coords, front_right_leg_coords, back_left_leg_coords, back_right_leg_coords) = orientation.get_coords(yaw, pitch, roll)
+
+        self.front_left_leg.manual_position_control(front_left_leg_coords)
+        self.front_right_leg.manual_position_control(front_right_leg_coords)
+        self.rear_left_leg.manual_position_control(back_left_leg_coords)
+        self.rear_right_leg.manual_position_control(back_right_leg_coords)
