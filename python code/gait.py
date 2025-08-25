@@ -9,7 +9,7 @@ class Gait:
     TROT = 1
 
     STEPS_PER_SECOND = 10
-    STEP_HEIGHT = 10
+    STEP_HEIGHT = 15 
     STEP_CURVE_DELTA = 0.2
     STEP_DISTANCE = 30
 
