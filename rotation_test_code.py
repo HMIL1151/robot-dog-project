@@ -20,6 +20,9 @@ torso_width_y_mm = 85.0
 torso_height_z_mm = 48.0
 torso_length_x_mm = leg_x_seperation_mm
 
+def on_any_slider(val):
+    update(None)
+
 # --- 3D Plotting and Sliders ---
 import matplotlib.pyplot as plt
 
@@ -132,23 +135,27 @@ def update(val):
 	yaw = math.radians(slider_yaw.val)
 	pitch = math.radians(slider_pitch.val)
 	roll = math.radians(slider_roll.val)
+	tx = slider_tx.val
+	ty = slider_ty.val
+	tz = slider_tz.val
 	ax.cla()
+	torso_origin_trans = vec_add(torso_origin, (tx, ty, tz))
 	# Plot foot points
 	xs = [pt[0] for pt in foot_points]
 	ys = [pt[1] for pt in foot_points]
 	zs = [pt[2] for pt in foot_points]
 	ax.scatter(xs, ys, zs, c='b', s=50, label='Feet')
 	# Plot torso origin
-	ax.scatter(*torso_origin, c='r', s=80, label='Torso Origin')
+	ax.scatter(*torso_origin_trans, c='r', s=80, label='Torso Origin')
 	# Plot torso box
-	corners = get_torso_corners(torso_origin, torso_length_x_mm, torso_width_y_mm, torso_height_z_mm)
-	corners_rot = apply_rotation(corners, torso_origin, yaw, pitch, roll)
+	corners = get_torso_corners(torso_origin_trans, torso_length_x_mm, torso_width_y_mm, torso_height_z_mm)
+	corners_rot = apply_rotation(corners, torso_origin_trans, yaw, pitch, roll)
 	plot_torso(ax, corners_rot)
 
 	# Draw coordinate axes at torso origin, showing orientation
 	axis_length = 60
 	R = rotation_matrix(yaw, pitch, roll)
-	origin = torso_origin
+	origin = torso_origin_trans
 	axes = [ (axis_length,0,0), (0,axis_length,0), (0,0,axis_length) ]
 	axes_rot = [mat_vec_mul(R, a) for a in axes]
 	colors = ['r', 'g', 'b']
@@ -172,33 +179,28 @@ def update(val):
 		(-l,  w, h),  # left_rear
 	]
 	hip_labels = ['left_front', 'right_front', 'right_rear', 'left_rear']
-	hips_world = apply_rotation([vec_add(h, torso_origin) for h in hips_local], torso_origin, yaw, pitch, roll)
+	hips_world = apply_rotation([vec_add(h, torso_origin_trans) for h in hips_local], torso_origin_trans, yaw, pitch, roll)
 
 	for i in range(len(hip_labels)):
 		ax.scatter(hips_world[i][0], hips_world[i][1], hips_world[i][2], c='m', s=80, marker='o')
 
 	# Label torso faces (left, right, front, rear) with increased spacing
-	corners = get_torso_corners(torso_origin, torso_length_x_mm, torso_width_y_mm, torso_height_z_mm)
-	corners_rot = apply_rotation(corners, torso_origin, yaw, pitch, roll)
+	corners = get_torso_corners(torso_origin_trans, torso_length_x_mm, torso_width_y_mm, torso_height_z_mm)
+	corners_rot = apply_rotation(corners, torso_origin_trans, yaw, pitch, roll)
 	face_offset = 1.5
 	face_centers = [
-		vec_add(torso_origin, apply_rotation([(0, w * face_offset, 0)], (0,0,0), yaw, pitch, roll)[0]),   # left
-		vec_add(torso_origin, apply_rotation([(0, -w * face_offset, 0)], (0,0,0), yaw, pitch, roll)[0]),  # right
-		vec_add(torso_origin, apply_rotation([(l * face_offset, 0, 0)], (0,0,0), yaw, pitch, roll)[0]),   # front
-		vec_add(torso_origin, apply_rotation([(-l * face_offset, 0, 0)], (0,0,0), yaw, pitch, roll)[0]),  # rear
+		vec_add(torso_origin_trans, apply_rotation([(0, w * face_offset, 0)], (0,0,0), yaw, pitch, roll)[0]),   # left
+		vec_add(torso_origin_trans, apply_rotation([(0, -w * face_offset, 0)], (0,0,0), yaw, pitch, roll)[0]),  # right
+		vec_add(torso_origin_trans, apply_rotation([(l * face_offset, 0, 0)], (0,0,0), yaw, pitch, roll)[0]),   # front
+		vec_add(torso_origin_trans, apply_rotation([(-l * face_offset, 0, 0)], (0,0,0), yaw, pitch, roll)[0]),  # rear
 	]
 	face_labels = ['left', 'right', 'front', 'rear']
 	for fc, fl in zip(face_centers, face_labels):
 		ax.text(fc[0], fc[1], fc[2]+torso_height_z_mm/2+10, fl, color='black', fontsize=12, ha='center', weight='bold')
 
-	# Find closest stationary foot point for each hip (at zero rotation)
-	hips_zero = [vec_add(h, torso_origin) for h in hips_local]
+	# Always pair hips to their original feet (fixed mapping)
 	foot_points_arr = foot_points
-	hip_to_foot_idx = []
-	for hip in hips_zero:
-		dists = [vec_distance(fp, hip) for fp in foot_points_arr]
-		idx = dists.index(min(dists))
-		hip_to_foot_idx.append(idx)
+	hip_to_foot_idx = [0, 1, 3, 2]  # left_front, right_front, right_rear (to left_back), left_rear (to right_back)
 
 	# Draw vectors from each hip (rotated) to its paired stationary foot
 	for i, idx in enumerate(hip_to_foot_idx):
@@ -275,15 +277,23 @@ axcolor = 'lightgoldenrodyellow'
 ax_yaw = plt.axes([0.15, 0.02, 0.65, 0.02], facecolor=axcolor)
 ax_pitch = plt.axes([0.15, 0.05, 0.65, 0.02], facecolor=axcolor)
 ax_roll = plt.axes([0.15, 0.08, 0.65, 0.02], facecolor=axcolor)
+ax_tx = plt.axes([0.02, 0.15, 0.02, 0.65], facecolor=axcolor)
+ax_ty = plt.axes([0.06, 0.15, 0.02, 0.65], facecolor=axcolor)
+ax_tz = plt.axes([0.10, 0.15, 0.02, 0.65], facecolor=axcolor)
 
 slider_yaw = Slider(ax_yaw, 'Yaw (°)', -30, 30, valinit=0, valstep=0.1)
 slider_pitch = Slider(ax_pitch, 'Pitch (°)', -30, 30, valinit=0, valstep=0.1)
 slider_roll = Slider(ax_roll, 'Roll (°)', -30, 30, valinit=0, valstep=0.1)
+slider_tx = Slider(ax_tx, 'X (mm)', -150, 150, valinit=0, valstep=0.5, orientation='vertical')
+slider_ty = Slider(ax_ty, 'Y (mm)', -150, 150, valinit=0, valstep=0.5, orientation='vertical')
+slider_tz = Slider(ax_tz, 'Z (mm)', -100, 100, valinit=0, valstep=0.5, orientation='vertical')
 
-slider_yaw.on_changed(update)
-slider_pitch.on_changed(update)
-slider_roll.on_changed(update)
+slider_yaw.on_changed(on_any_slider)
+slider_pitch.on_changed(on_any_slider)
+slider_roll.on_changed(on_any_slider)
+slider_tx.on_changed(on_any_slider)
+slider_ty.on_changed(on_any_slider)
+slider_tz.on_changed(on_any_slider)
 
-update(None)
 plt.show()
 
