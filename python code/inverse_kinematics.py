@@ -33,7 +33,7 @@ def inverse_kinematics(point):
     if not positive_roots:
         raise ValueError("No positive roots found")
     y_prime = float(positive_roots[0])
-    #print("y_prime: {:.2f}".format(y_prime))
+    print("y_prime: {:.2f}".format(y_prime))
 
     v = math.sqrt(math.pow(y, 2) + math.pow(foot_to_hip_z_distance_mm, 2))
     if z < hip_seperation_mm/2:
@@ -52,7 +52,6 @@ def inverse_kinematics(point):
     else:
         theta_h = math.acos((math.pow(y, 2) + math.pow(y_prime, 2) - math.pow(f, 2)) / (2*y*y_prime))
 
-
     if z > (hip_seperation_mm/2 + a*math.sin(math.pi - foot_legservo_hipservo_theta)):
         theta_h = -theta_h
     elif z < (hip_seperation_mm/2 + a*math.sin(math.pi - foot_legservo_hipservo_theta)):
@@ -61,6 +60,8 @@ def inverse_kinematics(point):
         theta_h = 0
         
     #print(f"theta_h: {math.degrees(theta_h):.2f}")
+
+    theta_h = math.degrees(theta_h)
 
     foot_coords = (x, y_prime)
     servo1_coords = (-servo_distance/2, 0)

@@ -76,9 +76,9 @@ servo_distance = 46
 thigh_length = 30
 calf_length = 120
 
-x = 2.008
-y = 129.24
-z = 95.49999
+x = 0.0
+y = 135.0
+z = 134.0
 
 q = d/2 - z
 

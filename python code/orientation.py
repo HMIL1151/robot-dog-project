@@ -1,128 +1,80 @@
 import math
-
-def matmul3(a, b):
-    return [
-        [sum(a[i][k]*b[k][j] for k in range(3)) for j in range(3)]
-        for i in range(3)
-    ]
-
-def matvecmul3(m, v):
-    return [sum(m[i][j]*v[j] for j in range(3)) for i in range(3)]
-
-def transpose3(m):
-    return [[m[j][i] for j in range(3)] for i in range(3)]
-
-def vec_sub(a, b):
-    return [a[i] - b[i] for i in range(3)]
-
-def vec_add(a, b):
-    return [a[i] + b[i] for i in range(3)]
-
-def get_cuboid_vertices(center, dims, rot):
-    l, w, h = dims
-    dx = l/2
-    dy = w/2
-    dz = h/2
-    corners = [
-        [ dx,  dy,  dz],
-        [ dx, -dy,  dz],
-        [-dx, -dy,  dz],
-        [-dx,  dy,  dz],
-        [ dx,  dy, -dz],
-        [ dx, -dy, -dz],
-        [-dx, -dy, -dz],
-        [-dx,  dy, -dz],
-    ]
-    rotated = [vec_add(matvecmul3(rot, c), center) for c in corners]
-    return rotated
-
-def deg2rad(deg):
-    return deg * math.pi / 180.0
-
-def get_rotation_matrix(yaw, pitch, roll):
-    cy = math.cos(deg2rad(yaw))
-    sy = math.sin(deg2rad(yaw))
-    cp = math.cos(deg2rad(pitch))
-    sp = math.sin(deg2rad(pitch))
-    cr = math.cos(deg2rad(roll))
-    sr = math.sin(deg2rad(roll))
-    yaw_matrix = [
-        [cy, -sy, 0],
-        [sy,  cy, 0],
-        [ 0,   0, 1]
-    ]
-    pitch_matrix = [
-        [cp, 0, sp],
-        [ 0, 1,  0],
-        [-sp,0, cp]
-    ]
-    roll_matrix = [
-        [1, 0, 0],
-        [0, cr, -sr],
-        [0, sr, cr]
-    ]
-    return matmul3(matmul3(yaw_matrix, pitch_matrix), roll_matrix)
-
-
-def draw_cuboid(ax, vertices, edges, lines):
-    # Remove old lines
-    for l in lines:
-        l.remove()
-    lines.clear()
-    # Draw new lines
-    for i,j in edges:
-        l, = ax.plot(*zip(vertices[i], vertices[j]), color='k')
-        lines.append(l)
-
-def fmt(coords):
-        return f"({coords[0]:.1f}, {coords[1]:.1f}, {coords[2]:.1f})"
-
+import misc_functions
 
 leg_x_seperation_mm = 221.0
-foot_y_seperation_mm = 95.5*2
+foot_y_seperation_mm = 95.5 * 2
 torso_zero_height_mm = 135.0
 
-left_front_foot_coords_WORLD = [leg_x_seperation_mm / 2, foot_y_seperation_mm/2, 0]
-right_front_foot_coords_WORLD = [leg_x_seperation_mm / 2, -foot_y_seperation_mm/2, 0]
-left_back_foot_coords_WORLD = [-leg_x_seperation_mm / 2, foot_y_seperation_mm/2, 0]
-right_back_foot_coords_WORLD = [-leg_x_seperation_mm / 2, -foot_y_seperation_mm/2, 0]
+left_front_foot_coords_WORLD = (leg_x_seperation_mm / 2, foot_y_seperation_mm / 2, 0)
+right_front_foot_coords_WORLD = (leg_x_seperation_mm / 2, -foot_y_seperation_mm / 2, 0)
+left_back_foot_coords_WORLD = (-leg_x_seperation_mm / 2, foot_y_seperation_mm / 2, 0)
+right_back_foot_coords_WORLD = (-leg_x_seperation_mm / 2, -foot_y_seperation_mm / 2, 0)
 
-torso_origin_coords_WORLD = [0, 0, torso_zero_height_mm]
+torso_origin_coords_WORLD = (0, 0, torso_zero_height_mm)
 
 torso_width_y_mm = 85.0
 torso_height_z_mm = 48.0
-torso_length_x_mm = 367.4
+torso_length_x_mm = leg_x_seperation_mm
 
-# Returns (front_left_leg_coords, front_right_leg_coords, back_left_leg_coords, back_right_leg_coords)
-def get_coords(yaw_angle_deg, pitch_angle_deg, roll_angle_deg):
-    foot_points = [
-        left_front_foot_coords_WORLD,
-        right_front_foot_coords_WORLD,
-        left_back_foot_coords_WORLD,
-        right_back_foot_coords_WORLD
-    ]
-    torso_point = torso_origin_coords_WORLD
-    rot = get_rotation_matrix(yaw_angle_deg, pitch_angle_deg, roll_angle_deg)
-    rotT = transpose3(rot)
-    # Transform feet to torso frame, then back to world frame (for plotting/leg coords)
-    foot_points_torso = [matvecmul3(rotT, vec_sub(fp, torso_point)) for fp in foot_points]
-    foot_points_torso_world = [vec_add(fp, torso_point) for fp in foot_points_torso]
+foot_points = [
+	left_front_foot_coords_WORLD,
+	right_front_foot_coords_WORLD,
+	left_back_foot_coords_WORLD,
+	right_back_foot_coords_WORLD
+]
+torso_origin = torso_origin_coords_WORLD
 
-    def world_foot_coords_to_leg_foot_coords(coords, side, face):
-        x_world, y_world, z_world = coords
-        if face == 'front':
-            x_leg = (leg_x_seperation_mm / 2) - x_world
-        else:
-            x_leg = -(leg_x_seperation_mm / 2) - x_world
-        y_leg = torso_height_z_mm - z_world + 87.0
-        z_leg = abs(y_world)
-        return (x_leg, y_leg, z_leg)
 
-    front_left_leg_coords = world_foot_coords_to_leg_foot_coords(foot_points_torso_world[0], 'left', 'front')
-    front_right_leg_coords = world_foot_coords_to_leg_foot_coords(foot_points_torso_world[1], 'right', 'front')
-    back_left_leg_coords = world_foot_coords_to_leg_foot_coords(foot_points_torso_world[2], 'left', 'back')
-    back_right_leg_coords = world_foot_coords_to_leg_foot_coords(foot_points_torso_world[3], 'right', 'back')
+		
 
-    #print(f"Front Left: {fmt(front_left_leg_coords)}, Front Right: {fmt(front_right_leg_coords)}, Back Left: {fmt(back_left_leg_coords)}, Back Right: {fmt(back_right_leg_coords)}")
+def set_translation_orientation(translation, orientation):
+	tx, ty, tz = translation
+	yaw_deg, pitch_deg, roll_deg = orientation
+	yaw = math.radians(yaw_deg)
+	pitch = math.radians(pitch_deg)
+	roll = math.radians(roll_deg)
+	torso_origin_trans = misc_functions.vec_add(torso_origin, (tx, ty, tz))
 
-    return (front_left_leg_coords, front_right_leg_coords, back_left_leg_coords, back_right_leg_coords)
+	# Hip locations (relative to torso origin)
+	l = torso_length_x_mm / 2
+	w = torso_width_y_mm / 2
+	h = 0
+	hips_local = [
+		( l,  w, h),  # left_front
+		( l, -w, h),  # right_front
+		(-l, -w, h),  # right_rear
+		(-l,  w, h),  # left_rear
+	]
+	hip_labels = ['left front', 'right front', 'right rear', 'left rear']
+	# Apply translation and rotation to hips
+	hips_world = misc_functions.apply_rotation([misc_functions.vec_add(h, torso_origin_trans) for h in hips_local], torso_origin_trans, yaw, pitch, roll)
+
+	# Always pair hips to their original feet (fixed mapping, with rear swapped)
+	foot_points_arr = foot_points
+	hip_to_foot_idx = [0, 1, 3, 2]
+
+	# Hip axes (local)
+	hip_axes_local = [
+		[(-1, 0, 0), (0, 0, -1), (0, 1, 0)],  # left_front
+		[(-1, 0, 0), (0, 0, -1), (0, -1, 0)], # right_front
+		[(-1, 0, 0), (0, 0, -1), (0, -1, 0)], # right_rear
+		[(-1, 0, 0), (0, 0, -1), (0, 1, 0)],  # left_rear
+	]
+	z_offsets = [torso_width_y_mm/2] * 4
+
+	# Compute hip-to-foot vectors in hip local axes
+	R = misc_functions.rotation_matrix(yaw, pitch, roll)
+	vectors = []
+	for i, idx in enumerate(hip_to_foot_idx):
+		hip = hips_world[i]
+		foot = foot_points_arr[idx]
+		vec_world = misc_functions.vec_sub(foot, hip)
+		axes = hip_axes_local[i]
+		R_hip = tuple(misc_functions.mat_vec_mul(R, axis) for axis in axes)
+		vec_local = [misc_functions.vec_dot(R_hip[j], vec_world) for j in range(3)]
+		vec_local[2] += z_offsets[i]
+		vec_local[0] = -vec_local[0]
+		vectors.append(tuple(vec_local))
+	# Return in the order: front_left, front_right, rear_right, rear_left
+	return (vectors[0], vectors[1], vectors[2], vectors[3])
+	

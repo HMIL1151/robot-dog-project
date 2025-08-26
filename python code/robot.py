@@ -108,11 +108,12 @@ class Robot:
         self.rear_left_leg.manual_servo_control(servo_angles)
         self.rear_right_leg.manual_servo_control(servo_angles)
 
-    def manual_position_control(self, position):
-        self.front_left_leg.manual_position_control(position)
-        self.front_right_leg.manual_position_control(position)
-        self.rear_left_leg.manual_position_control(position)
-        self.rear_right_leg.manual_position_control(position)
+    def manual_position_control(self, positions):
+        front_left_position, front_right_position, rear_right_position, rear_left_position = positions
+        self.front_left_leg.manual_position_control(front_left_position)
+        self.front_right_leg.manual_position_control(front_right_position)
+        self.rear_left_leg.manual_position_control(rear_left_position)
+        self.rear_right_leg.manual_position_control(rear_right_position)
 
     def deactivate_all_hips(self):
         self.front_left_leg.deactivate_hip()
@@ -194,7 +195,7 @@ class Robot:
 
         time.sleep(1)
 
-    def sit(self):
+    def sleep(self):
         self.zero_robot()
         time.sleep(1)
 
@@ -246,12 +247,15 @@ class Robot:
         time.sleep(1)
 
 
-    def set_torso_orientation(self, yaw, pitch, roll):
-        self.torso_yaw = yaw
-        self.torso_pitch = pitch
-        self.torso_roll = roll
+    def set_translation_orientation(self, translation, rotation):
 
-        (front_left_leg_coords, front_right_leg_coords, back_left_leg_coords, back_right_leg_coords) = orientation.get_coords(yaw, pitch, roll)
+        (front_left_leg_coords, front_right_leg_coords, back_right_leg_coords, back_left_leg_coords) = orientation.set_translation_orientation(translation, rotation)
+
+        #print all leg coords to 1 decimal place
+        # print(f"Front Left Leg Coords: {[f'{c:.1f}' for c in front_left_leg_coords]}")
+        # print(f"Front Right Leg Coords: {[f'{c:.1f}' for c in front_right_leg_coords]}")
+        # print(f"Back Right Leg Coords: {[f'{c:.1f}' for c in back_right_leg_coords]}")
+        # print(f"Back Left Leg Coords: {[f'{c:.1f}' for c in back_left_leg_coords]}")
 
         self.front_left_leg.manual_position_control(front_left_leg_coords)
         self.front_right_leg.manual_position_control(front_right_leg_coords)

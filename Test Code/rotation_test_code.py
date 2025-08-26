@@ -139,23 +139,37 @@ def update(val):
 	ty = slider_ty.val
 	tz = slider_tz.val
 	ax.cla()
-	torso_origin_trans = vec_add(torso_origin, (tx, ty, tz))
-	# Plot foot points
+
+	# 1. Compute rotation matrix
+	R = rotation_matrix(yaw, pitch, roll)
+
+	# 2. Torso origin (before translation)
+	torso_origin_rot = torso_origin
+
+	# 3. Torso box corners at original origin
+	corners = get_torso_corners(torso_origin_rot, torso_length_x_mm, torso_width_y_mm, torso_height_z_mm)
+	# 4. Rotate corners about original origin
+	corners_rot = [mat_vec_mul(R, vec_sub(c, torso_origin_rot)) for c in corners]
+	corners_rot = [vec_add(c, torso_origin_rot) for c in corners_rot]
+	# 5. Translate all rotated corners
+	torso_origin_final = vec_add(torso_origin_rot, (tx, ty, tz))
+	corners_final = [vec_add(c, (tx, ty, tz)) for c in corners_rot]
+
+	# Plot foot points (fixed in world)
 	xs = [pt[0] for pt in foot_points]
 	ys = [pt[1] for pt in foot_points]
 	zs = [pt[2] for pt in foot_points]
 	ax.scatter(xs, ys, zs, c='b', s=50, label='Feet')
+
 	# Plot torso origin
-	ax.scatter(*torso_origin_trans, c='r', s=80, label='Torso Origin')
+	ax.scatter(*torso_origin_final, c='r', s=80, label='Torso Origin')
+
 	# Plot torso box
-	corners = get_torso_corners(torso_origin_trans, torso_length_x_mm, torso_width_y_mm, torso_height_z_mm)
-	corners_rot = apply_rotation(corners, torso_origin_trans, yaw, pitch, roll)
-	plot_torso(ax, corners_rot)
+	plot_torso(ax, corners_final)
 
 	# Draw coordinate axes at torso origin, showing orientation
 	axis_length = 60
-	R = rotation_matrix(yaw, pitch, roll)
-	origin = torso_origin_trans
+	origin = torso_origin_final
 	axes = [ (axis_length,0,0), (0,axis_length,0), (0,0,axis_length) ]
 	axes_rot = [mat_vec_mul(R, a) for a in axes]
 	colors = ['r', 'g', 'b']
@@ -178,22 +192,16 @@ def update(val):
 		(-l, -w, h),  # right_rear
 		(-l,  w, h),  # left_rear
 	]
+	hips_rot = [mat_vec_mul(R, h) for h in hips_local]
+	hips_world = [vec_add(vec_add(torso_origin_rot, h), (tx, ty, tz)) for h in hips_rot]
 	hip_labels = ['left_front', 'right_front', 'right_rear', 'left_rear']
-	hips_world = apply_rotation([vec_add(h, torso_origin_trans) for h in hips_local], torso_origin_trans, yaw, pitch, roll)
-
 	for i in range(len(hip_labels)):
 		ax.scatter(hips_world[i][0], hips_world[i][1], hips_world[i][2], c='m', s=80, marker='o')
 
 	# Label torso faces (left, right, front, rear) with increased spacing
-	corners = get_torso_corners(torso_origin_trans, torso_length_x_mm, torso_width_y_mm, torso_height_z_mm)
-	corners_rot = apply_rotation(corners, torso_origin_trans, yaw, pitch, roll)
 	face_offset = 1.5
-	face_centers = [
-		vec_add(torso_origin_trans, apply_rotation([(0, w * face_offset, 0)], (0,0,0), yaw, pitch, roll)[0]),   # left
-		vec_add(torso_origin_trans, apply_rotation([(0, -w * face_offset, 0)], (0,0,0), yaw, pitch, roll)[0]),  # right
-		vec_add(torso_origin_trans, apply_rotation([(l * face_offset, 0, 0)], (0,0,0), yaw, pitch, roll)[0]),   # front
-		vec_add(torso_origin_trans, apply_rotation([(-l * face_offset, 0, 0)], (0,0,0), yaw, pitch, roll)[0]),  # rear
-	]
+	face_dirs = [ (0, w * face_offset, 0), (0, -w * face_offset, 0), (l * face_offset, 0, 0), (-l * face_offset, 0, 0) ]
+	face_centers = [vec_add(torso_origin_final, mat_vec_mul(R, d)) for d in face_dirs]
 	face_labels = ['left', 'right', 'front', 'rear']
 	for fc, fl in zip(face_centers, face_labels):
 		ax.text(fc[0], fc[1], fc[2]+torso_height_z_mm/2+10, fl, color='black', fontsize=12, ha='center', weight='bold')
@@ -209,11 +217,6 @@ def update(val):
 		ax.plot([hip[0], foot[0]], [hip[1], foot[1]], [hip[2], foot[2]], color='k', linestyle='--', linewidth=2)
 
 	# Draw custom coordinate axes at each hip (custom orientation)
-	# For all hips:
-	#   - Y axis: downwards (opposite torso Z)
-	#   - Z axis: outwards from the hip (aligned with torso Y, but sign depends on hip)
-	#   - X axis: points to -X in torso axes
-	# We'll define the local axes for each hip in torso coordinates, then rotate them
 	hip_axes_local = [
 		# left_front
 		[(-1, 0, 0), (0, 0, -1), (0, 1, 0)],
@@ -244,6 +247,7 @@ def update(val):
 	ax.set_ylim(-200, 200)
 	ax.set_zlim(0, 250)
 	plt.draw()
+
 	print('--- Hip to Foot Vectors (in Hip Local Axes) ---')
 	# Define the new hip axes for each hip (in torso coordinates)
 	hip_axes_local = [
@@ -281,9 +285,9 @@ ax_tx = plt.axes([0.02, 0.15, 0.02, 0.65], facecolor=axcolor)
 ax_ty = plt.axes([0.06, 0.15, 0.02, 0.65], facecolor=axcolor)
 ax_tz = plt.axes([0.10, 0.15, 0.02, 0.65], facecolor=axcolor)
 
-slider_yaw = Slider(ax_yaw, 'Yaw (°)', -30, 30, valinit=0, valstep=0.1)
-slider_pitch = Slider(ax_pitch, 'Pitch (°)', -30, 30, valinit=0, valstep=0.1)
-slider_roll = Slider(ax_roll, 'Roll (°)', -30, 30, valinit=0, valstep=0.1)
+slider_yaw = Slider(ax_yaw, 'Yaw (°)', -30, 30, valinit=0, valstep=0.5)
+slider_pitch = Slider(ax_pitch, 'Pitch (°)', -30, 30, valinit=0, valstep=0.5)
+slider_roll = Slider(ax_roll, 'Roll (°)', -30, 30, valinit=0, valstep=0.5)
 slider_tx = Slider(ax_tx, 'X (mm)', -150, 150, valinit=0, valstep=0.5, orientation='vertical')
 slider_ty = Slider(ax_ty, 'Y (mm)', -150, 150, valinit=0, valstep=0.5, orientation='vertical')
 slider_tz = Slider(ax_tz, 'Z (mm)', -100, 100, valinit=0, valstep=0.5, orientation='vertical')
