@@ -18,7 +18,7 @@ torso_origin_coords_WORLD = (0, 0, torso_zero_height_mm)
 
 torso_width_y_mm = 85.0
 torso_height_z_mm = 48.0
-torso_length_x_mm = 367.4
+torso_length_x_mm = leg_x_seperation_mm
 
 # --- 3D Plotting and Sliders ---
 import matplotlib.pyplot as plt
@@ -206,12 +206,30 @@ def update(val):
 		foot = foot_points_arr[idx]
 		ax.plot([hip[0], foot[0]], [hip[1], foot[1]], [hip[2], foot[2]], color='k', linestyle='--', linewidth=2)
 
-	# Draw coordinate axes at each hip (same orientation as torso origin)
-	for hip in hips_world:
-		for j in range(3):
-			ax.plot([hip[0], hip[0]+axes_rot[j][0]],
-					[hip[1], hip[1]+axes_rot[j][1]],
-					[hip[2], hip[2]+axes_rot[j][2]],
+	# Draw custom coordinate axes at each hip (custom orientation)
+	# For all hips:
+	#   - Y axis: downwards (opposite torso Z)
+	#   - Z axis: outwards from the hip (aligned with torso Y, but sign depends on hip)
+	#   - X axis: points to -X in torso axes
+	# We'll define the local axes for each hip in torso coordinates, then rotate them
+	hip_axes_local = [
+		# left_front
+		[(-1, 0, 0), (0, 0, -1), (0, 1, 0)],
+		# right_front
+		[(-1, 0, 0), (0, 0, -1), (0, -1, 0)],
+		# right_rear
+		[(-1, 0, 0), (0, 0, -1), (0, -1, 0)],
+		# left_rear
+		[(-1, 0, 0), (0, 0, -1), (0, 1, 0)],
+	]
+	for i, hip in enumerate(hips_world):
+		local_axes = hip_axes_local[i]
+		for j, axis_dir in enumerate(local_axes):
+			axis_vec = vec_mul(axis_dir, axis_length)
+			axis_vec_rot = mat_vec_mul(R, axis_vec)
+			ax.plot([hip[0], hip[0]+axis_vec_rot[0]],
+					[hip[1], hip[1]+axis_vec_rot[1]],
+					[hip[2], hip[2]+axis_vec_rot[2]],
 					color=colors[j], linewidth=2, alpha=0.7)
 
 	ax.set_xlabel('X (mm)')
@@ -225,13 +243,28 @@ def update(val):
 	ax.set_zlim(0, 250)
 	plt.draw()
 	print('--- Hip to Foot Vectors (in Hip Local Axes) ---')
-	Rt = transpose(R)
+	# Define the new hip axes for each hip (in torso coordinates)
+	hip_axes_local = [
+		# left_front
+		[(-1, 0, 0), (0, 0, -1), (0, 1, 0)],
+		# right_front
+		[(-1, 0, 0), (0, 0, -1), (0, -1, 0)],
+		# right_rear
+		[(-1, 0, 0), (0, 0, -1), (0, -1, 0)],
+		# left_rear
+		[(-1, 0, 0), (0, 0, -1), (0, 1, 0)],
+	]
+	z_offsets = [torso_width_y_mm/2] * 4  # or set different values for each hip if needed
+	hip_labels = ['left front', 'right front', 'right rear', 'left rear']
 	for i, idx in enumerate(hip_to_foot_idx):
 		hip = hips_world[i]
 		foot = foot_points_arr[idx]
 		vec_world = vec_sub(foot, hip)
-		vec_local = mat_vec_mul(Rt, vec_world)
-		print(f"Hip {i+1} to Foot {idx+1}: X={vec_local[0]:.2f} mm, Y={vec_local[1]:.2f} mm, Z={vec_local[2]:.2f} mm")
+		axes = hip_axes_local[i]
+		R_hip = tuple(mat_vec_mul(R, axis) for axis in axes)
+		vec_local = [vec_dot(R_hip[j], vec_world) for j in range(3)]
+		vec_local[2] += z_offsets[i]
+		print(f"{hip_labels[i].capitalize()} Hip to Foot: X={vec_local[0]:.2f} mm, Y={vec_local[1]:.2f} mm, Z={vec_local[2]:.2f} mm")
 
 
 fig = plt.figure(figsize=(8,7))
