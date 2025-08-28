@@ -256,7 +256,7 @@ class Robot:
 
         angle_max = 15
         count = 0
-        count_max = 5
+        count_max = 3
         increment = 1
         direction = 1
         angle = 0
@@ -321,11 +321,11 @@ class Robot:
                 self.set_translation_orientation((0, 0, 0), (0, 0, angle))
 
 
-    def rotation_test(self, iterations):
+    def translation_test(self, iterations):
 
         translation_max = 20
         count = 0
-        count_max = 5
+        count_max = 3
         increment = 1
         direction = 1
         translation = 0
