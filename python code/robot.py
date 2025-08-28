@@ -246,6 +246,8 @@ class Robot:
 
         time.sleep(1)
 
+        self.disable()
+
 
     def set_translation_orientation(self, translation, rotation):
 
@@ -261,3 +263,142 @@ class Robot:
         self.front_right_leg.manual_position_control(front_right_leg_coords)
         self.rear_left_leg.manual_position_control(back_left_leg_coords)
         self.rear_right_leg.manual_position_control(back_right_leg_coords)
+
+    def rotation_test(self, iterations):
+
+        angle_max = 15
+        count = 0
+        count_max = 5
+        increment = 1
+        direction = 1
+        angle = 0
+
+        for i in range (iterations):
+
+            while count < count_max:
+                self.set_translation_orientation((0, 0, 0), (angle, 0, 0))
+                angle += increment * direction
+                if angle > angle_max or angle < -angle_max:
+                    direction *= -1
+                    angle = max(min(angle, angle_max), -angle_max)
+                    count += 1
+
+            # Interpolate angle back to zero
+            while abs(angle) > 0.01:  # Use a small threshold to avoid floating point issues
+                angle -= increment * (1 if angle > 0 else -1)
+                # Clamp to zero if we overshoot
+                if (angle > 0 and angle - increment < 0) or (angle < 0 and angle + increment > 0):
+                    angle = 0
+                self.set_translation_orientation((0, 0, 0), (angle, 0, 0))
+            count = 0
+
+            angle_max = angle_max / 2
+
+
+
+            while count < count_max:
+                self.set_translation_orientation((0, 0, 0), (0, angle, 0))
+                angle += increment * direction
+                if angle > angle_max or angle < -angle_max:
+                    direction *= -1
+                    angle = max(min(angle, angle_max), -angle_max)
+                    count += 1
+
+            # Interpolate angle back to zero
+            while abs(angle) > 0.01:  # Use a small threshold to avoid floating point issues
+                angle -= increment * (1 if angle > 0 else -1)
+                # Clamp to zero if we overshoot
+                if (angle > 0 and angle - increment < 0) or (angle < 0 and angle + increment > 0):
+                    angle = 0
+                self.set_translation_orientation((0, 0, 0), (0, angle, 0))
+            count = 0
+
+            angle_max = angle_max * 2
+
+
+            while count < count_max:
+                self.set_translation_orientation((0, 0, 0), (0, 0, angle))
+                angle += increment * direction
+                if angle > angle_max or angle < -angle_max:
+                    direction *= -1
+                    angle = max(min(angle, angle_max), -angle_max)
+                    count += 1
+
+            # Interpolate angle back to zero
+            while abs(angle) > 0.01:  # Use a small threshold to avoid floating point issues
+                angle -= increment * (1 if angle > 0 else -1)
+                # Clamp to zero if we overshoot
+                if (angle > 0 and angle - increment < 0) or (angle < 0 and angle + increment > 0):
+                    angle = 0
+                self.set_translation_orientation((0, 0, 0), (0, 0, angle))
+
+
+    def rotation_test(self, iterations):
+
+        translation_max = 20
+        count = 0
+        count_max = 5
+        increment = 1
+        direction = 1
+        translation = 0
+
+        for i in range (iterations):
+
+            while count < count_max:
+                self.set_translation_orientation((translation, 0, 0), (0, 0, 0))
+                translation += increment * direction
+                if translation > translation_max or translation < -translation_max:
+                    direction *= -1
+                    translation = max(min(translation, translation_max), -translation_max)
+                    count += 1
+
+            # Interpolate translation back to zero
+            while abs(translation) > 0.01:  # Use a small threshold to avoid floating point issues
+                translation -= increment * (1 if translation > 0 else -1)
+                # Clamp to zero if we overshoot
+                if (translation > 0 and translation - increment < 0) or (translation < 0 and translation + increment > 0):
+                    translation = 0
+                self.set_translation_orientation((translation, 0, 0), (0, 0, 0))
+            count = 0
+
+            translation_max = translation_max / 2
+
+
+
+            while count < count_max:
+                self.set_translation_orientation((0, translation, 0), (0, 0, 0))
+                translation += increment * direction
+                if translation > translation_max or translation < -translation_max:
+                    direction *= -1
+                    translation = max(min(translation, translation_max), -translation_max)
+                    count += 1
+
+            # Interpolate translation back to zero
+            while abs(translation) > 0.01:  # Use a small threshold to avoid floating point issues
+                translation -= increment * (1 if translation > 0 else -1)
+                # Clamp to zero if we overshoot
+                if (translation > 0 and translation - increment < 0) or (translation < 0 and translation + increment > 0):
+                    translation = 0
+                self.set_translation_orientation((0, translation, 0), (0, 0, 0))
+            count = 0
+
+            translation_max = translation_max * 2
+
+
+            while count < count_max:
+                self.set_translation_orientation((0, 0, translation), (0, 0, 0))
+                translation += increment * direction
+                if translation > translation_max or translation < -translation_max:
+                    direction *= -1
+                    translation = max(min(translation, translation_max), -translation_max)
+                    count += 1
+
+            # Interpolate translation back to zero
+            while abs(translation) > 0.01:  # Use a small threshold to avoid floating point issues
+                translation -= increment * (1 if translation > 0 else -1)
+                # Clamp to zero if we overshoot
+                if (translation > 0 and translation - increment < 0) or (translation < 0 and translation + increment > 0):
+                    translation = 0
+                self.set_translation_orientation((0, 0, translation), (0, 0, 0))
+
+      

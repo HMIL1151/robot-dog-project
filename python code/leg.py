@@ -67,8 +67,8 @@ class Leg:
         right_servo = (left_angle - SERVO_OFFSET_DEG) * -self.side
 
         if (self.side * self.face < 0):
-            hip_servo = hip_angle
-        else:
             hip_servo = -hip_angle
+        else:
+            hip_servo = hip_angle
 
         return (hip_servo, left_servo, right_servo)

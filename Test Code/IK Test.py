@@ -77,8 +77,8 @@ thigh_length = 30
 calf_length = 120
 
 x = 0.0
-y = 135.0
-z = 134.0
+y = 155.12
+z = 57.31
 
 q = d/2 - z
 
@@ -96,27 +96,12 @@ if positive_roots.size == 0:
 y_prime = float(positive_roots[0])
 print(f"y_prime: {y_prime:.2f}")
 
-v = math.sqrt(math.pow(y, 2) + math.pow(q, 2))
-if z < d/2:
-    theta_a_prime = math.atan(y/q)
-elif z > d/2:
-    theta_a_prime = math.atan((z-d/2)/y) + math.pi/2
-else:
-    theta_a_prime = math.pi/2
-theta_a_prime_prime = math.acos((math.pow(a, 2) + math.pow(v, 2) - math.pow(y_prime, 2)) / (2*a*v))
-theta_a = theta_a_prime + theta_a_prime_prime
-
-f = math.sqrt(math.pow(q, 2) + math.pow(a, 2) - 2*a*q*math.cos(theta_a))
-theta_h = math.acos((math.pow(y, 2) + math.pow(y_prime, 2) - math.pow(f, 2)) / (2*y*y_prime))
-
-if z > (d/2 + a*math.sin(math.pi - theta_l)):
-    theta_h = -theta_h
-elif z < (d/2 + a*math.sin(math.pi - theta_l)):
-    theta_h = theta_h
-else:
-    theta_h = 0
-    
-print(f"theta_h: {math.degrees(theta_h):.2f}")
+f = math.sqrt(math.pow(q, 2) + math.pow(y, 2))
+theta_a = math.acos((math.pow(a, 2) + math.pow(f, 2) - math.pow(y_prime, 2)) / (2*a*f))
+theta_q = math.acos((math.pow(q, 2) + math.pow(f, 2) - math.pow(y, 2)) / (2*q*f))
+theta_c = 4*math.pi - math.pi/2 - theta_l - theta_a - theta_q
+theta_h = math.degrees(2*math.pi - theta_c) - 90
+print(f"theta_h: {theta_h:.2f}")
 
 foot_coords = (x, y_prime)
 servo1_coords = (-servo_distance/2, 0)
