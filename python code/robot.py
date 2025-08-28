@@ -55,28 +55,19 @@ class Robot:
     def set_speed(self, speed):
         self.speed = speed
 
-    def set_direction(self, direction):
-        self.direction = direction
-
-    def set_gait(self, gait):
+    def set_gait(self, gait, direction):
         self.gait = Gait(gait)
-        #try:
-        self.servo_positions = self.gait.calculate_gait(self.speed)
+
+        self.servo_positions = self.gait.calculate_gait(self.speed, direction)
         self.start_indicies = self.gait.get_start_indices()
-        #except Exception as e:
-           # raise ValueError(f"Error occurred while calculating gait: {e}") from e
 
     def go(self):
         print("Robot is moving")
         if self.gait:
             num_positions = len(self.servo_positions)
 
-            if (self.direction == Direction.FORWARDS):
-                for step in range(num_positions):
-                    self.run_legs_through_gait(step, num_positions)
-            else:
-                for step in reversed(range(num_positions)):
-                    self.run_legs_through_gait(step, num_positions)
+            for step in range(num_positions):
+                self.run_legs_through_gait(step, num_positions)
 
         else:
             print("No gait set")
@@ -123,10 +114,14 @@ class Robot:
 
     def run_legs_through_gait(self, step, num_positions):
 
-        front_left_positions = self.servo_positions[(self.start_indicies[Robot.FRONT_LEFT_LEG] + step) % num_positions]
-        front_right_positions = self.servo_positions[(self.start_indicies[Robot.FRONT_RIGHT_LEG] + step) % num_positions]
-        rear_right_positions = self.servo_positions[(self.start_indicies[Robot.REAR_RIGHT_LEG] + step) % num_positions]
-        rear_left_positions = self.servo_positions[(self.start_indicies[Robot.REAR_LEFT_LEG] + step) % num_positions]
+        front_left_positions = list(self.servo_positions[(self.start_indicies[Robot.FRONT_LEFT_LEG] + step) % num_positions])
+        front_right_positions = list(self.servo_positions[(self.start_indicies[Robot.FRONT_RIGHT_LEG] + step) % num_positions])
+        rear_right_positions = list(self.servo_positions[(self.start_indicies[Robot.REAR_RIGHT_LEG] + step) % num_positions])
+        rear_left_positions = list(self.servo_positions[(self.start_indicies[Robot.REAR_LEFT_LEG] + step) % num_positions])
+
+        if self.gait.direction == Direction.LEFT:
+            front_right_positions[0] = -front_right_positions[0]
+            rear_right_positions[0] = -rear_right_positions[0]
 
         self.front_left_leg.set_servo_angles(front_left_positions)
         self.front_right_leg.set_servo_angles(front_right_positions)
@@ -134,8 +129,7 @@ class Robot:
         self.rear_left_leg.set_servo_angles(rear_left_positions)
 
         print("Setting servos to ", front_left_positions, front_right_positions, rear_right_positions, rear_left_positions)
-
-        time.sleep(0.05)
+        time.sleep(0.02)
 
     def set_carry_position(self):
         self.front_left_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 240, 90))
@@ -252,12 +246,6 @@ class Robot:
     def set_translation_orientation(self, translation, rotation):
 
         (front_left_leg_coords, front_right_leg_coords, back_right_leg_coords, back_left_leg_coords) = orientation.set_translation_orientation(translation, rotation)
-
-        #print all leg coords to 1 decimal place
-        # print(f"Front Left Leg Coords: {[f'{c:.1f}' for c in front_left_leg_coords]}")
-        # print(f"Front Right Leg Coords: {[f'{c:.1f}' for c in front_right_leg_coords]}")
-        # print(f"Back Right Leg Coords: {[f'{c:.1f}' for c in back_right_leg_coords]}")
-        # print(f"Back Left Leg Coords: {[f'{c:.1f}' for c in back_left_leg_coords]}")
 
         self.front_left_leg.manual_position_control(front_left_leg_coords)
         self.front_right_leg.manual_position_control(front_right_leg_coords)

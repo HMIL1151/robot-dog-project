@@ -13,9 +13,11 @@ class Speed:
 
 class Direction:
     FORWARDS = 0
-    BACKWARDS = 180
-    LEFT = 90
-    RIGHT = 270
+    BACKWARDS = 1
+    LEFT = 2
+    RIGHT = 3
+    CLOCKWISE = 4
+    COUNTERCLOCKWISE = 5
 
     @staticmethod
     def angle(degrees):
