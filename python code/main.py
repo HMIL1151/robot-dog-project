@@ -6,8 +6,11 @@ import time
 import orientation
 import inverse_kinematics
 import constants
+from machine import UART, Pin
 
 gc.collect()
+
+uart1 = UART(0, baudrate=115200, tx=Pin(16), rx=Pin(17))
 
 koda = Robot()
 koda.stand()
