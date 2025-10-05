@@ -9,6 +9,9 @@ from units import Speed, Direction
 import misc_functions
 import inverse_kinematics
 import orientation
+import comms_input
+import robot_orientation
+import controller
 
 class Robot:
     FRONT_LEFT_LEG = 0
@@ -21,6 +24,9 @@ class Robot:
         self.front_right_leg = Leg(servo2040.SERVO_2, servo2040.SERVO_8, servo2040.SERVO_14, RIGHT, FRONT)
         self.rear_right_leg = Leg(servo2040.SERVO_3, servo2040.SERVO_9, servo2040.SERVO_15, RIGHT, REAR)
         self.rear_left_leg = Leg(servo2040.SERVO_4, servo2040.SERVO_10, servo2040.SERVO_12, LEFT, REAR)
+        self.orientation = robot_orientation.RobotOrientation()
+        self.controller = controller.Controller()
+
         self.speed = None
         self.direction = None
         self.gait = None
@@ -29,6 +35,7 @@ class Robot:
         self.y = 0
         self.stand_steps = 20
         self.set_carry_position()
+        
 
     def zero_robot(self):
         self.front_left_leg.zero_position()
@@ -36,6 +43,9 @@ class Robot:
         self.rear_right_leg.zero_position()
         self.rear_left_leg.zero_position()
         self.robot_zeroed = True
+
+    def read_controller(self):
+        self.controller.update()
     
     def is_robot_zeroed(self):
         return self.robot_zeroed

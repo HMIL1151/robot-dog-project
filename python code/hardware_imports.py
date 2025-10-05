@@ -5,9 +5,11 @@ from constants import EMULATION_MODE
 if EMULATION_MODE:
     from mock_lib.servo import Servo, ServoCluster, servo2040, ANGULAR, LINEAR, CONTINUOUS, Calibration
     from mock_lib.mock_led import WS2812, NUM_LEDS, LED_DATA, RGBLED
+    from mock_lib.uart import UART, Pin
 else:
     try:
         from servo import Servo, ServoCluster, servo2040, ANGULAR, LINEAR, CONTINUOUS, Calibration
+        from machine import UART, Pin
         # from pimoroni_ws2812 import WS2812
         # from servo2040 import NUM_LEDS, LED_DATA
         # from pimoroni import RGBLED
