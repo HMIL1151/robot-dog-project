@@ -32,9 +32,6 @@ class Leg:
         self.left_servo.value(servo_commands[1])
         self.right_servo.value(servo_commands[2])
 
-        servo_vals = self.get_servo_values()
-        print("Setting servos to ", servo_vals["hip"], servo_vals["left"], servo_vals["right"])
-
     def get_servo_values(self):
         return {
             "hip": self.hip_servo.value(),

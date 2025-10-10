@@ -27,7 +27,7 @@ def calculate_curve(step_length, step_height, delta, stance_steps, swing_steps, 
             points = points[::-1]
             print("Reversed points:", points)
 
-    if direction == Direction.LEFT or direction == Direction.RIGHT:
+    elif direction == Direction.LEFT or direction == Direction.RIGHT:
 
         P0 = (ZERO_X,     ZERO_Y,     ZERO_Z - L/2)
         P1 = (ZERO_X,     ZERO_Y,     ZERO_Z - L/2 - d)
@@ -41,7 +41,9 @@ def calculate_curve(step_length, step_height, delta, stance_steps, swing_steps, 
         if direction == Direction.RIGHT:
             points = points[::-1]
 
-
+    else:
+        raise ValueError("Invalid direction for bezier curve calculation")
+    
     n = len(points) - 1
     path_points = []
     for j in range(swing_steps):

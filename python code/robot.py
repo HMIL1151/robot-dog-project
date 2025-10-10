@@ -5,11 +5,10 @@ from hardware_imports import Servo, ServoCluster, servo2040, ANGULAR, LINEAR, CO
 from gait import Gait
 import math
 from constants import ZERO_X, ZERO_Y, ZERO_Z, HIP_UP_ANGLE_DEG, LEFT, RIGHT, FRONT, REAR
-from units import Speed, Direction
+from units import Direction, Speed
 import misc_functions
 import inverse_kinematics
 import orientation
-import comms_input
 import robot_orientation
 import controller
 
@@ -19,6 +18,11 @@ class Robot:
     REAR_RIGHT_LEG = 2
     REAR_LEFT_LEG = 3
 
+    STOPPED = 0
+    SETTING_OFF = 1
+    MOVING = 2
+    STOPPING = 3
+
     def __init__(self):
         self.front_left_leg = Leg(servo2040.SERVO_1, servo2040.SERVO_7, servo2040.SERVO_13, LEFT, FRONT)
         self.front_right_leg = Leg(servo2040.SERVO_2, servo2040.SERVO_8, servo2040.SERVO_14, RIGHT, FRONT)
@@ -27,14 +31,18 @@ class Robot:
         self.orientation = robot_orientation.RobotOrientation()
         self.controller = controller.Controller()
 
-        self.speed = None
+        self.speed = Speed.in_mm_per_second(20)
         self.direction = None
-        self.gait = None
+        self.starting_direction = None
+        self.gait = Gait(Gait.TROT)
         self.robot_zeroed = False
         self.x = 0
         self.y = 0
         self.stand_steps = 20
+        self.current_step_index = None
         self.set_carry_position()
+        self.servo_positions = None
+        self.state = Robot.STOPPED
         
 
     def zero_robot(self):
@@ -44,9 +52,93 @@ class Robot:
         self.rear_left_leg.zero_position()
         self.robot_zeroed = True
 
+    def update_robot(self):
+        self.read_controller()
+
+        if self.state == Robot.STOPPED:
+            print("Robot is stopped")
+            if self.gait is None or self.speed is None or self.direction is None:
+                return
+            self.state = Robot.SETTING_OFF
+            self.starting_direction = self.direction
+            self.servo_positions = self.gait.calculate_starting_gait(self.speed, self.direction)
+            self.start_indicies = self.gait.get_start_indices()
+            self.current_step_index = 0
+        
+        if self.state == Robot.SETTING_OFF:
+            print("Robot is setting off")
+            if self.current_step_index < len(self.servo_positions):
+                self.run_legs_through_gait(self.current_step_index, len(self.servo_positions))
+                self.current_step_index += 1
+            else:
+                self.state = Robot.MOVING
+                self.servo_positions = self.gait.calculate_walk_gait(self.speed, self.starting_direction)
+                self.start_indicies = self.gait.get_start_indices()
+                self.current_step_index = 0
+
+        if self.state == Robot.MOVING:
+            print("Robot is moving")
+            if self.current_step_index < len(self.servo_positions):
+                self.run_legs_through_gait(self.current_step_index, len(self.servo_positions))
+                self.current_step_index += 1
+            elif self.direction is not None:
+                self.current_step_index = 0
+            else:
+                self.state = Robot.STOPPING
+                self.servo_positions = self.gait.calculate_stopping_gait(self.speed, self.starting_direction)
+                self.start_indicies = self.gait.get_start_indices()
+                self.current_step_index = 0
+        
+        if self.state == Robot.STOPPING:
+            print("Robot is stopping")
+            if self.current_step_index < len(self.servo_positions):
+                self.run_legs_through_gait(self.current_step_index, len(self.servo_positions))
+                self.current_step_index += 1
+            else:
+                self.state = Robot.STOPPED
+                self.current_step_index = None
+                self.direction = None
+                self.starting_direction = None
+                self.servo_positions = None
+
     def read_controller(self):
         self.controller.update()
-    
+
+        if self.controller.axes.left_vertical == 1.0:
+            if self.direction is None:
+                self.direction = Direction.FORWARDS
+            elif self.direction != Direction.FORWARDS:
+                self.direction = None
+            else:
+                self.direction = Direction.FORWARDS
+
+        elif self.controller.axes.left_vertical == -1.0:
+            if self.gait is None:
+                self.direction = Direction.BACKWARDS
+            elif self.direction != Direction.BACKWARDS:
+                self.direction = None
+            else:
+                self.direction = Direction.BACKWARDS
+
+        elif self.controller.axes.left_horizontal == 1.0:
+            if self.gait is None:
+                self.direction = Direction.RIGHT
+            elif self.direction != Direction.RIGHT:
+                self.direction = None
+            else:
+                self.direction = Direction.RIGHT
+
+        elif self.controller.axes.left_horizontal == -1.0:
+            if self.gait is None:
+                self.direction = Direction.LEFT
+            elif self.direction != Direction.LEFT:
+                self.direction = None
+            else:
+                self.direction = Direction.LEFT
+        
+        else:
+            self.direction = None
+
     def is_robot_zeroed(self):
         return self.robot_zeroed
 
@@ -67,17 +159,19 @@ class Robot:
 
     def set_gait(self, gait, direction):
         self.gait = Gait(gait)
-
-        self.servo_positions = self.gait.calculate_gait(self.speed, direction)
         self.start_indicies = self.gait.get_start_indices()
+        self.gait_set = True
 
     def go(self):
         print("Robot is moving")
         if self.gait:
             num_positions = len(self.servo_positions)
-
-            for step in range(num_positions):
-                self.run_legs_through_gait(step, num_positions)
+            if self.current_step_index is None:
+                self.current_step_index = 0
+            else:
+                self.current_step_index = (self.current_step_index + 1) % num_positions
+            self.run_legs_through_gait(self.current_step_index, num_positions)
+            
 
         else:
             print("No gait set")

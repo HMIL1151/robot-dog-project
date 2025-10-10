@@ -2,7 +2,7 @@ import inverse_kinematics
 from constants import ZERO_X, ZERO_Y, ZERO_Z
 import bezier_curve
 import math
-from units import Direction
+from units import Direction, Speed
 
 
 class Gait:
@@ -21,7 +21,7 @@ class Gait:
         self.stance_steps = None
         self.swing_steps = None
 
-    def calculate_gait(self, speed, direction):
+    def calculate_walk_gait(self, speed: Speed, direction: Direction):
         self.direction = direction
         self.stance_steps = int(Gait.STEPS_PER_SECOND * (Gait.STEP_DISTANCE / speed))
 
@@ -44,6 +44,11 @@ class Gait:
         return servo_positions
     #except Exception as e:
            # raise ValueError("Error occurred during inverse kinematics: {}".format(e))
+
+    def calculate_starting_gait(self, speed, direction):
+        return self.calculate_walk_gait(speed, direction)
+    def calculate_stopping_gait(self, speed, direction):
+        return self.calculate_walk_gait(speed, direction)
 
     def get_start_indices(self):
         if self.gait_type == Gait.CRAWL:

@@ -17,6 +17,8 @@ class Controller:
         if self.comms.read_packet():
             self.buttons = self.comms.current_buttons
             self.axes = self.comms.current_axes
+            # print("Axes:", self.axes.left_horizontal, self.axes.left_vertical,
+            #       self.axes.right_horizontal, self.axes.right_vertical)
         else:
             print("No packet received")
 

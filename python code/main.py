@@ -11,13 +11,15 @@ import constants
 gc.collect()
 
 koda = Robot()
+#koda.stand()
 
 while True:
-    koda.read_controller()
+    koda.update_robot()
+    
     time.sleep(0.05)
 
 
-koda.stand()
+
 koda.set_speed(Speed.in_mm_per_second(20))
 
 koda.set_gait(Gait.TROT, Direction.FORWARDS)
