@@ -37,8 +37,7 @@ class Robot:
         self.starting_direction = None
         self.gait = Gait(Gait.TROT)
         self.robot_zeroed = False
-        self.x = 0
-        self.y = 0
+
         self.stand_steps = 20
         self.current_step_index = 0
         self.set_carry_position()
@@ -79,7 +78,6 @@ class Robot:
             else:
                 self.state = Robot.MOVING
 
-                #TODO: Using points here so we can update leg positions directly so we can then print them out
                 self.foot_positions = self.gait.calculate_walk_gait(self.speed, self.starting_direction)
                 start_indices = self.gait.get_start_indices()
 
@@ -160,26 +158,13 @@ class Robot:
 
         print()
 
+    def run_legs_through_gait(self, step, num_positions):
+        for leg in self.legs:
+            foot_position = self.foot_positions[(leg.start_index + step) % num_positions]
+            leg.set_foot_position(foot_position)
         
 
 
-
-
-
-
-
-
-
-
-
-    def is_robot_zeroed(self):
-        return self.robot_zeroed
-
-    def test_all(self):
-        self.front_left_leg.test_all()
-        self.front_right_leg.test_all()
-        self.rear_right_leg.test_all()
-        self.rear_left_leg.test_all()
 
     def disable(self):
         self.front_left_leg.disable()
@@ -187,83 +172,9 @@ class Robot:
         self.rear_right_leg.disable()
         self.rear_left_leg.disable()
 
-    def set_speed(self, speed):
-        self.speed = speed
-
-    def set_gait(self, gait, direction):
-        self.gait = Gait(gait)
-        self.start_indicies = self.gait.get_start_indices()
-        self.gait_set = True
-
-    def go(self):
-        print("Robot is moving")
-        if self.gait:
-            num_positions = len(self.servo_positions)
-            if self.current_step_index is None:
-                self.current_step_index = 0
-            else:
-                self.current_step_index = (self.current_step_index + 1) % num_positions
-            self.run_legs_through_gait(self.current_step_index, num_positions)
-            
-
-        else:
-            print("No gait set")
-
-    def stop(self):
-        print("Robot has stopped")
-
-    def go_to_distance(self, distance):
-        print(f"Robot is moving to distance: {distance}")
-
-    def go_for_duration(self, duration):
-        print(f"Robot is moving for duration: {duration}")
-
-    def go_for_steps(self, steps):
-        for _ in range(steps):
-            self.go()
-            print(f"Step {_ + 1} of {steps} completed")
-
-    def go_to_position(self, x, y):
-        self.direction = math.sqrt(math.pow(x, 2) + math.pow(y, 2))
-        print(f"Going to position: ({x}, {y}) in direction: {self.direction}")
-
-    def get_position(self):
-        return self.x, self.y
-
-    def manual_servo_control(self, servo_angles):
-        self.front_left_leg.manual_servo_control(servo_angles)
-        self.front_right_leg.manual_servo_control(servo_angles)
-        self.rear_left_leg.manual_servo_control(servo_angles)
-        self.rear_right_leg.manual_servo_control(servo_angles)
-
-    def manual_position_control(self, positions):
-        front_left_position, front_right_position, rear_right_position, rear_left_position = positions
-        self.front_left_leg.manual_position_control(front_left_position)
-        self.front_right_leg.manual_position_control(front_right_position)
-        self.rear_left_leg.manual_position_control(rear_left_position)
-        self.rear_right_leg.manual_position_control(rear_right_position)
-
-    def deactivate_all_hips(self):
-        self.front_left_leg.deactivate_hip()
-        self.front_right_leg.deactivate_hip()
-        self.rear_left_leg.deactivate_hip()
-        self.rear_right_leg.deactivate_hip()
 
 
 
-
-    def run_legs_through_gait(self, step, num_positions):
-        for leg in self.legs:
-            foot_position = self.foot_positions[(leg.start_index + step) % num_positions]
-            leg.set_foot_position(foot_position)
-
-
-
-    def set_carry_position(self):
-        self.front_left_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 240, 90))
-        self.rear_left_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 90, 240))
-        self.front_right_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 240, 90))
-        self.rear_right_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 90, 240))
 
     def stand(self):
         time.sleep(2)
@@ -317,6 +228,11 @@ class Robot:
 
         time.sleep(1)
 
+
+
+
+
+
     def sleep(self):
         self.zero_robot()
         time.sleep(1)
@@ -369,6 +285,10 @@ class Robot:
         time.sleep(1)
 
         self.disable()
+
+
+
+
 
 
     def set_translation_orientation(self, translation, rotation):
