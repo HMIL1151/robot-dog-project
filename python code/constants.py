@@ -1,8 +1,11 @@
+from units import Position
+
 EMULATION_MODE = True
 
 ZERO_X = 0
 ZERO_Y = 135
 ZERO_Z = 95.5
+ZERO_POSITION = Position(ZERO_X, ZERO_Y, ZERO_Z)
 
 LEFT = -1
 RIGHT = 1

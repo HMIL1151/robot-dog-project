@@ -1,6 +1,6 @@
 from math import factorial
 from constants import ZERO_X, ZERO_Y, ZERO_Z
-from units import Direction
+from units import Direction, Position
 
 def binomial_coefficient(n, k):
     return factorial(n) // (factorial(k) * factorial(n - k))
@@ -21,11 +21,9 @@ def calculate_curve(step_length, step_height, delta, stance_steps, swing_steps, 
         P5 = (ZERO_X + L/2,     ZERO_Y,     ZERO_Z)
 
         points = [P0, P1, P2, P3, P4, P5]
-        print(points)
 
         if direction == Direction.BACKWARDS:
             points = points[::-1]
-            print("Reversed points:", points)
 
     elif direction == Direction.LEFT or direction == Direction.RIGHT:
 
@@ -57,7 +55,9 @@ def calculate_curve(step_length, step_height, delta, stance_steps, swing_steps, 
             x += basis * P[0]
             y += basis * P[1]
             z += basis * P[2]
-        path_points.append((x, y, z))
+        
+        position = Position(x, y, z)
+        path_points.append(position)
 
     x0, y0, z0 = points[-1]
     x1, y1, z1 = points[0]
@@ -67,6 +67,7 @@ def calculate_curve(step_length, step_height, delta, stance_steps, swing_steps, 
         x = x0 + (x1 - x0) * t
         z = z0 + (z1 - z0) * t
         y = y0 + (y1 - y0) * t
-        path_points.append((x, y, z))
+        position = Position(x, y, z)
+        path_points.append(position)
 
     return path_points

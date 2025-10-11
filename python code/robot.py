@@ -4,7 +4,7 @@ from leg import Leg
 from hardware_imports import Servo, ServoCluster, servo2040, ANGULAR, LINEAR, CONTINUOUS, Calibration
 from gait import Gait
 import math
-from constants import ZERO_X, ZERO_Y, ZERO_Z, HIP_UP_ANGLE_DEG, LEFT, RIGHT, FRONT, REAR
+from constants import ZERO_X, ZERO_Y, ZERO_Z, HIP_UP_ANGLE_DEG, LEFT, RIGHT, FRONT, REAR, ZERO_POSITION
 from units import Direction, Speed
 import misc_functions
 import inverse_kinematics
@@ -28,6 +28,7 @@ class Robot:
         self.front_right_leg = Leg(servo2040.SERVO_2, servo2040.SERVO_8, servo2040.SERVO_14, RIGHT, FRONT)
         self.rear_right_leg = Leg(servo2040.SERVO_3, servo2040.SERVO_9, servo2040.SERVO_15, RIGHT, REAR)
         self.rear_left_leg = Leg(servo2040.SERVO_4, servo2040.SERVO_10, servo2040.SERVO_12, LEFT, REAR)
+        self.legs = [self.front_left_leg, self.front_right_leg, self.rear_right_leg, self.rear_left_leg]
         self.orientation = robot_orientation.RobotOrientation()
         self.controller = controller.Controller()
 
@@ -56,7 +57,6 @@ class Robot:
         self.read_controller()
 
         if self.state == Robot.STOPPED:
-            print("Robot is stopped")
             if self.gait is None or self.speed is None or self.direction is None:
                 return
             self.state = Robot.SETTING_OFF
@@ -66,18 +66,18 @@ class Robot:
             self.current_step_index = 0
         
         if self.state == Robot.SETTING_OFF:
-            print("Robot is setting off")
             if self.current_step_index < len(self.servo_positions):
                 self.run_legs_through_gait(self.current_step_index, len(self.servo_positions))
                 self.current_step_index += 1
             else:
                 self.state = Robot.MOVING
-                self.servo_positions = self.gait.calculate_walk_gait(self.speed, self.starting_direction)
+
+                #TODO: Using points here so we can update leg positions directly so we can then print them out
+                point, self.servo_positions = self.gait.calculate_walk_gait(self.speed, self.starting_direction)
                 self.start_indicies = self.gait.get_start_indices()
                 self.current_step_index = 0
 
         if self.state == Robot.MOVING:
-            print("Robot is moving")
             if self.current_step_index < len(self.servo_positions):
                 self.run_legs_through_gait(self.current_step_index, len(self.servo_positions))
                 self.current_step_index += 1
@@ -90,7 +90,6 @@ class Robot:
                 self.current_step_index = 0
         
         if self.state == Robot.STOPPING:
-            print("Robot is stopping")
             if self.current_step_index < len(self.servo_positions):
                 self.run_legs_through_gait(self.current_step_index, len(self.servo_positions))
                 self.current_step_index += 1
@@ -138,6 +137,23 @@ class Robot:
         
         else:
             self.direction = None
+
+        print("Foot position:", end=' ')
+        for leg in self.legs:
+            foot_position = leg.get_foot_position()
+            print(foot_position.x, ' ', foot_position.y, ' ', foot_position.z, end=' ')
+
+        print()
+
+
+
+
+
+
+
+
+
+
 
     def is_robot_zeroed(self):
         return self.robot_zeroed
@@ -232,7 +248,6 @@ class Robot:
         self.rear_right_leg.set_servo_angles(rear_right_positions)
         self.rear_left_leg.set_servo_angles(rear_left_positions)
 
-        print("Setting servos to ", front_left_positions, front_right_positions, rear_right_positions, rear_left_positions)
         time.sleep(0.02)
 
     def set_carry_position(self):
@@ -279,10 +294,10 @@ class Robot:
 
         #stand up straight
         print("Standing up straight")
-        front_left_servo_positions = misc_functions.interpolate_between_servo_positions((0, 180, 180), inverse_kinematics.inverse_kinematics((ZERO_X, ZERO_Y, ZERO_Z)), self.stand_steps)
-        rear_left_servo_positions = misc_functions.interpolate_between_servo_positions((0, 180, 180), inverse_kinematics.inverse_kinematics((ZERO_X, ZERO_Y, ZERO_Z)), self.stand_steps)
-        front_right_servo_positions = misc_functions.interpolate_between_servo_positions((0, 180, 180), inverse_kinematics.inverse_kinematics((ZERO_X, ZERO_Y, ZERO_Z)), self.stand_steps)
-        rear_right_servo_positions = misc_functions.interpolate_between_servo_positions((0, 180, 180), inverse_kinematics.inverse_kinematics((ZERO_X, ZERO_Y, ZERO_Z)), self.stand_steps)
+        front_left_servo_positions = misc_functions.interpolate_between_servo_positions((0, 180, 180), inverse_kinematics.inverse_kinematics(ZERO_POSITION), self.stand_steps)
+        rear_left_servo_positions = misc_functions.interpolate_between_servo_positions((0, 180, 180), inverse_kinematics.inverse_kinematics(ZERO_POSITION), self.stand_steps)
+        front_right_servo_positions = misc_functions.interpolate_between_servo_positions((0, 180, 180), inverse_kinematics.inverse_kinematics(ZERO_POSITION), self.stand_steps)
+        rear_right_servo_positions = misc_functions.interpolate_between_servo_positions((0, 180, 180), inverse_kinematics.inverse_kinematics(ZERO_POSITION), self.stand_steps)
 
         for i in range(self.stand_steps + 1):
             self.front_left_leg.set_servo_angles(front_left_servo_positions[i])
@@ -298,10 +313,10 @@ class Robot:
         time.sleep(1)
 
         print("Standing up straight")
-        front_left_servo_positions =  misc_functions.interpolate_between_servo_positions(inverse_kinematics.inverse_kinematics((ZERO_X, ZERO_Y, ZERO_Z)), (0, 180, 180), self.stand_steps)
-        rear_left_servo_positions =   misc_functions.interpolate_between_servo_positions(inverse_kinematics.inverse_kinematics((ZERO_X, ZERO_Y, ZERO_Z)), (0, 180, 180), self.stand_steps)
-        front_right_servo_positions = misc_functions.interpolate_between_servo_positions(inverse_kinematics.inverse_kinematics((ZERO_X, ZERO_Y, ZERO_Z)), (0, 180, 180), self.stand_steps)
-        rear_right_servo_positions =  misc_functions.interpolate_between_servo_positions(inverse_kinematics.inverse_kinematics((ZERO_X, ZERO_Y, ZERO_Z)), (0, 180, 180), self.stand_steps)
+        front_left_servo_positions =  misc_functions.interpolate_between_servo_positions(inverse_kinematics.inverse_kinematics(ZERO_POSITION), (0, 180, 180), self.stand_steps)
+        rear_left_servo_positions =   misc_functions.interpolate_between_servo_positions(inverse_kinematics.inverse_kinematics(ZERO_POSITION), (0, 180, 180), self.stand_steps)
+        front_right_servo_positions = misc_functions.interpolate_between_servo_positions(inverse_kinematics.inverse_kinematics(ZERO_POSITION), (0, 180, 180), self.stand_steps)
+        rear_right_servo_positions =  misc_functions.interpolate_between_servo_positions(inverse_kinematics.inverse_kinematics(ZERO_POSITION), (0, 180, 180), self.stand_steps)
 
         for i in range(self.stand_steps + 1):
             self.front_left_leg.set_servo_angles(front_left_servo_positions[i])

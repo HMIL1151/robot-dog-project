@@ -22,3 +22,9 @@ class Direction:
     @staticmethod
     def angle(degrees):
         return degrees
+    
+class Position:
+    def __init__(self, x_mm, y_mm, z_mm):
+        self.x = x_mm
+        self.y = y_mm
+        self.z = z_mm

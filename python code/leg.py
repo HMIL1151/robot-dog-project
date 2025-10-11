@@ -1,6 +1,7 @@
 from hardware_imports import Servo
 import inverse_kinematics
-from constants import ZERO_X, ZERO_Y, ZERO_Z, SERVO_OFFSET_DEG
+from constants import ZERO_X, ZERO_Y, ZERO_Z, SERVO_OFFSET_DEG, ZERO_POSITION
+from units import Position
 
 
 class Leg:
@@ -11,14 +12,18 @@ class Leg:
         self.side = side
         self.face = face
         self.enable()
+        self.foot_position = ZERO_POSITION
 
     def zero_position(self):
-        self.manual_position_control((ZERO_X, ZERO_Y, ZERO_Z))
+        self.manual_position_control(ZERO_POSITION)
 
     def enable(self):
         self.hip_servo.enable()
         self.left_servo.enable()
         self.right_servo.enable()
+
+    def get_foot_position(self):
+        return self.foot_position
 
     def disable(self):
         self.hip_servo.disable()
@@ -44,11 +49,10 @@ class Leg:
         self.left_servo.value(servo_angles[1])
         self.right_servo.value(servo_angles[2])
 
-    def manual_position_control(self, position):
-        servo_angles = inverse_kinematics.inverse_kinematics(position)
+    def manual_position_control(self, position: Position):
+        self.foot_position = position
+        servo_angles = inverse_kinematics.inverse_kinematics(self.foot_position)
         servo_commands = self.kinematic_angles_to_servo_angles(servo_angles)
-
-        print(servo_commands)
 
         self.hip_servo.value(servo_commands[0])
         self.left_servo.value(servo_commands[1])
