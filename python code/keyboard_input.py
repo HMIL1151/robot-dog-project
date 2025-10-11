@@ -93,6 +93,13 @@ class keyboardInputDevice():
         self.current_buttons.r2 = self._is_pressed('page_up')
         self.current_buttons.r1 = self._is_pressed('right')
 
+        # Misc Buttons (enter, backspace, home, end)
+        self.current_buttons.options = self._is_pressed('enter')
+        self.current_buttons.share = self._is_pressed('backspace')
+        self.current_buttons.ps = self._is_pressed('space')
+        self.current_buttons.touchpad = self._is_pressed('end')
+
+
 
 
     

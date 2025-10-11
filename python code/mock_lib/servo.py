@@ -1,8 +1,8 @@
 class Servo:
     def __init__(self, pin, *args, **kwargs):
         self._value = 0
-    def enable(self): print("Servo enabled")
-    def disable(self): print("Servo disabled")
+    def enable(self): return
+    def disable(self): return
     def value(self, v=None):
         if v is not None:
             self._value = v

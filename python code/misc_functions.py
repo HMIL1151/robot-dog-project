@@ -1,4 +1,26 @@
 import math
+from units import Position
+
+def interpolate_between_positions(start_pos: Position, end_pos: Position, steps: int) -> list[Position]:
+	start_x = start_pos.x
+	start_y = start_pos.y
+	start_z = start_pos.z
+
+	end_x = end_pos.x
+	end_y = end_pos.y
+	end_z = end_pos.z
+
+	positions = []
+	for i in range(steps + 1):
+		position = Position(
+			start_x + (end_x - start_x) * i / steps,
+			start_y + (end_y - start_y) * i / steps,
+			start_z + (end_z - start_z) * i / steps
+		)
+		positions.append(position)
+
+	return positions
+
 
 def interpolate_between_servo_positions(start_pos, end_pos, steps):
     start_angle_hip = start_pos[0]
