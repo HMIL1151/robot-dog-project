@@ -40,9 +40,9 @@ class Robot:
         self.x = 0
         self.y = 0
         self.stand_steps = 20
-        self.current_step_index = None
+        self.current_step_index = 0
         self.set_carry_position()
-        self.servo_positions = None
+        self.foot_positions = ZERO_POSITION
         self.state = Robot.STOPPED
         
 
@@ -58,47 +58,62 @@ class Robot:
 
         if self.state == Robot.STOPPED:
             if self.gait is None or self.speed is None or self.direction is None:
+                self.foot_positions = [ZERO_POSITION]
+                self.run_legs_through_gait(self.current_step_index, len(self.foot_positions))
                 return
             self.state = Robot.SETTING_OFF
+
             self.starting_direction = self.direction
-            self.servo_positions = self.gait.calculate_starting_gait(self.speed, self.direction)
-            self.start_indicies = self.gait.get_start_indices()
+            self.foot_positions = self.gait.calculate_starting_gait(self.speed, self.direction)
+            start_indices = self.gait.get_start_indices()
+
+            for i in range(len(self.legs)):
+                self.legs[i].start_index = start_indices[i]
+
             self.current_step_index = 0
         
         if self.state == Robot.SETTING_OFF:
-            if self.current_step_index < len(self.servo_positions):
-                self.run_legs_through_gait(self.current_step_index, len(self.servo_positions))
+            if self.current_step_index < len(self.foot_positions):
+                self.run_legs_through_gait(self.current_step_index, len(self.foot_positions))
                 self.current_step_index += 1
             else:
                 self.state = Robot.MOVING
 
                 #TODO: Using points here so we can update leg positions directly so we can then print them out
-                point, self.servo_positions = self.gait.calculate_walk_gait(self.speed, self.starting_direction)
-                self.start_indicies = self.gait.get_start_indices()
+                self.foot_positions = self.gait.calculate_walk_gait(self.speed, self.starting_direction)
+                start_indices = self.gait.get_start_indices()
+
+                for i in range(len(self.legs)):
+                    self.legs[i].start_index = start_indices[i]
+
                 self.current_step_index = 0
 
         if self.state == Robot.MOVING:
-            if self.current_step_index < len(self.servo_positions):
-                self.run_legs_through_gait(self.current_step_index, len(self.servo_positions))
+            if self.current_step_index < len(self.foot_positions):
+                self.run_legs_through_gait(self.current_step_index, len(self.foot_positions))
                 self.current_step_index += 1
             elif self.direction is not None:
                 self.current_step_index = 0
             else:
                 self.state = Robot.STOPPING
-                self.servo_positions = self.gait.calculate_stopping_gait(self.speed, self.starting_direction)
-                self.start_indicies = self.gait.get_start_indices()
+                self.foot_positions = self.gait.calculate_stopping_gait(self.speed, self.starting_direction)
+                start_indices = self.gait.get_start_indices()
+
+                for i in range(len(self.legs)):
+                    self.legs[i].start_index = start_indices[i]
+
                 self.current_step_index = 0
         
         if self.state == Robot.STOPPING:
-            if self.current_step_index < len(self.servo_positions):
-                self.run_legs_through_gait(self.current_step_index, len(self.servo_positions))
+            if self.current_step_index < len(self.foot_positions):
+                self.run_legs_through_gait(self.current_step_index, len(self.foot_positions))
                 self.current_step_index += 1
             else:
                 self.state = Robot.STOPPED
-                self.current_step_index = None
+                self.current_step_index = 0
                 self.direction = None
                 self.starting_direction = None
-                self.servo_positions = None
+                self.foot_positions = None
 
     def read_controller(self):
         self.controller.update()
@@ -112,7 +127,7 @@ class Robot:
                 self.direction = Direction.FORWARDS
 
         elif self.controller.axes.left_vertical == -1.0:
-            if self.gait is None:
+            if self.direction is None:
                 self.direction = Direction.BACKWARDS
             elif self.direction != Direction.BACKWARDS:
                 self.direction = None
@@ -120,7 +135,7 @@ class Robot:
                 self.direction = Direction.BACKWARDS
 
         elif self.controller.axes.left_horizontal == 1.0:
-            if self.gait is None:
+            if self.direction is None:
                 self.direction = Direction.RIGHT
             elif self.direction != Direction.RIGHT:
                 self.direction = None
@@ -128,7 +143,7 @@ class Robot:
                 self.direction = Direction.RIGHT
 
         elif self.controller.axes.left_horizontal == -1.0:
-            if self.gait is None:
+            if self.direction is None:
                 self.direction = Direction.LEFT
             elif self.direction != Direction.LEFT:
                 self.direction = None
@@ -141,9 +156,11 @@ class Robot:
         print("Foot position:", end=' ')
         for leg in self.legs:
             foot_position = leg.get_foot_position()
-            print(foot_position.x, ' ', foot_position.y, ' ', foot_position.z, end=' ')
+            print("[", format(foot_position.x, '.1f'), format(foot_position.y, '.1f'), format(foot_position.z, '.1f'), "] ", end=' ')
 
         print()
+
+        
 
 
 
@@ -232,23 +249,15 @@ class Robot:
         self.rear_left_leg.deactivate_hip()
         self.rear_right_leg.deactivate_hip()
 
+
+
+
     def run_legs_through_gait(self, step, num_positions):
+        for leg in self.legs:
+            foot_position = self.foot_positions[(leg.start_index + step) % num_positions]
+            leg.set_foot_position(foot_position)
 
-        front_left_positions = list(self.servo_positions[(self.start_indicies[Robot.FRONT_LEFT_LEG] + step) % num_positions])
-        front_right_positions = list(self.servo_positions[(self.start_indicies[Robot.FRONT_RIGHT_LEG] + step) % num_positions])
-        rear_right_positions = list(self.servo_positions[(self.start_indicies[Robot.REAR_RIGHT_LEG] + step) % num_positions])
-        rear_left_positions = list(self.servo_positions[(self.start_indicies[Robot.REAR_LEFT_LEG] + step) % num_positions])
 
-        if self.gait.direction == Direction.LEFT:
-            front_right_positions[0] = -front_right_positions[0]
-            rear_right_positions[0] = -rear_right_positions[0]
-
-        self.front_left_leg.set_servo_angles(front_left_positions)
-        self.front_right_leg.set_servo_angles(front_right_positions)
-        self.rear_right_leg.set_servo_angles(rear_right_positions)
-        self.rear_left_leg.set_servo_angles(rear_left_positions)
-
-        time.sleep(0.02)
 
     def set_carry_position(self):
         self.front_left_leg.set_servo_angles((HIP_UP_ANGLE_DEG, 240, 90))

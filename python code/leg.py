@@ -11,6 +11,7 @@ class Leg:
         self.right_servo = Servo(rearServoNum)
         self.side = side
         self.face = face
+        self.start_index = 0
         self.enable()
         self.foot_position = ZERO_POSITION
 
@@ -49,7 +50,7 @@ class Leg:
         self.left_servo.value(servo_angles[1])
         self.right_servo.value(servo_angles[2])
 
-    def manual_position_control(self, position: Position):
+    def set_foot_position(self, position: Position):
         self.foot_position = position
         servo_angles = inverse_kinematics.inverse_kinematics(self.foot_position)
         servo_commands = self.kinematic_angles_to_servo_angles(servo_angles)

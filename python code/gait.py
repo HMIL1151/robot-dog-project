@@ -39,8 +39,7 @@ class Gait:
 
         path_points = bezier_curve.calculate_curve(Gait.STEP_DISTANCE, Gait.STEP_HEIGHT, Gait.STEP_CURVE_DELTA, self.stance_steps, self.swing_steps, gait_direction)
 
-        servo_positions = inverse_kinematics.ik_points(path_points)
-        return (path_points, servo_positions)
+        return path_points
 
     def calculate_starting_gait(self, speed, direction):
         return self.calculate_walk_gait(speed, direction)
