@@ -13,6 +13,7 @@ gc.collect()
 koda = Robot()
 
 while not koda.turn_on:
+    koda.controller.update()
     koda.check_on_button()
     time.sleep(0.1)
 
