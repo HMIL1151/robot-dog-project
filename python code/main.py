@@ -1,12 +1,6 @@
 import gc
 from robot import Robot
-from gait import Gait
-from units import Speed, Direction
-import struct
 import time
-import orientation
-import inverse_kinematics
-import constants
 
 gc.collect()
 
