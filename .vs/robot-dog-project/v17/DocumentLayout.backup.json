@@ -1,0 +1,254 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\harrison.milburn\\robot-dog-project\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\keyboard_input.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:python code\\keyboard_input.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\controller.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:python code\\controller.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\comms_input.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:python code\\comms_input.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\constants.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:python code\\constants.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\robot.py||{8B382828-6202-11D1-8870-0000F87579D2}|",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:python code\\robot.py||{8B382828-6202-11D1-8870-0000F87579D2}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\harrison.milburn\\robot-dog-project\\gui\\emulated_controller_gui.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:gui\\emulated_controller_gui.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\harrison.milburn\\robot-dog-project\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\main.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:python code\\main.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\hardware_imports.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:python code\\hardware_imports.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\robot_orientation.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:python code\\robot_orientation.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\orientation.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:python code\\orientation.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\harrison.milburn\\robot-dog-project\\ESP32_CODE\\ESP32_CODE.ino||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ESP32_CODE\\ESP32_CODE.ino||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\leg.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:python code\\leg.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\mock_lib\\servo.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:python code\\mock_lib\\servo.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 136,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "keyboard_input.py",
+              "DocumentMoniker": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\keyboard_input.py",
+              "RelativeDocumentMoniker": "python code\\keyboard_input.py",
+              "ToolTip": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\keyboard_input.py",
+              "RelativeToolTip": "python code\\keyboard_input.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-10T18:37:32.597Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "comms_input.py",
+              "DocumentMoniker": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\comms_input.py",
+              "RelativeDocumentMoniker": "python code\\comms_input.py",
+              "ToolTip": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\comms_input.py",
+              "RelativeToolTip": "python code\\comms_input.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-10T13:55:52.461Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "emulated_controller_gui.py",
+              "DocumentMoniker": "C:\\Users\\harrison.milburn\\robot-dog-project\\gui\\emulated_controller_gui.py",
+              "RelativeDocumentMoniker": "gui\\emulated_controller_gui.py",
+              "ToolTip": "C:\\Users\\harrison.milburn\\robot-dog-project\\gui\\emulated_controller_gui.py",
+              "RelativeToolTip": "gui\\emulated_controller_gui.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-05T19:33:12.855Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "constants.py",
+              "DocumentMoniker": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\constants.py",
+              "RelativeDocumentMoniker": "python code\\constants.py",
+              "ToolTip": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\constants.py",
+              "RelativeToolTip": "python code\\constants.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-05T16:28:48.9Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "ESP32_CODE.ino",
+              "DocumentMoniker": "C:\\Users\\harrison.milburn\\robot-dog-project\\ESP32_CODE\\ESP32_CODE.ino",
+              "RelativeDocumentMoniker": "ESP32_CODE\\ESP32_CODE.ino",
+              "ToolTip": "C:\\Users\\harrison.milburn\\robot-dog-project\\ESP32_CODE\\ESP32_CODE.ino",
+              "RelativeToolTip": "ESP32_CODE\\ESP32_CODE.ino",
+              "ViewState": "AgIAAHYAAAAAAAAAAAAowKoAAAAAAAAAAAAAAA==",
+              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAOjSURBVDhPnZTLb1RlGIef75wz17bT6UBbRKZAIERsRGsiXoIxgDESo0Yx7oxrm5AYV/4DLt1IIBjdoGHBwnhhA2EjFk1cgKJQiCFCraWXKXY6c\u002BbMOd/tdUFRJEHEJ3k27y/v73tXn2KF8fFxPti/n\u002Bk4KV5P04LcDP6FWrGgR3p7uvv27ePQwYMgIurBsTHe//zLsFoobPlufv71Za13WZEa3K1SEaGWK/n8qaeGh44OlkoXXtz5jFNf/XqFjyYvbh2t1d5rpOnz1vni3apuooAoCHStWPh6z0j93fmk\u002B2N4\u002BckdbB8aHr/aar/ZMaakneNeTK0NW9rUF5Kufra\u002B7oQ6cOZc8XRj4USj2336v152OwoYyBfO7d24fmcg3hevp\u002BnAsjG0b7G14q2zO82XtWFJZ9Vflpo9QTNNiY1VsXW0jSNznkqhyPq\u002BCsPlMoIito62dXhRDJbKbOirUC0U0V5oG0fsbuwupxlRK81IrKPrHOUwZPf9a9m5ZgishTDgcqfLZ1emMF7Yu3GEB3rLKA8qCvm2cZ1jU9PEzpJD0c40UUtrtHc4Lzw6vIqX1g7zxfnzXFiOGSyXeHnzJt7asplMhH5nOXZ\u002BkkWjua/cw2ujW1nsJhyfmSULHLExBG1jsSLklWKs2s\u002BZ6RlOLi6xevUgDRXy4eQl6qUCoz0lPv7pZ5J8gcc3bGCi2eL0zAxj1X5KCrwXYmsJWtbinEcQnLUkIgS5HL1ph5JOMUoRZ4ZEG7J8gUgcURwTeUfiwGYavMd6T2ItQewsIkJmLWfnF9hS6eOhapVzSYoOI14dWcfvjQUm5\u002BZ5ZaRO21iOX5tjU3\u002BFh/vK/DA7S9c5ECFxDvXEkaPVuUxPGPGjZYTd1QrbagNoIBSh0Y45OTuHCSOeWzPEmnIJrwLywMXFRU4uNWlHOXIqmKrlcjvUI4ePVJvaTFhkVBDyzjOohIqC1HkWvRAHIYQhPc6xWkFZQcs5GiJkUR4VBESoqd4o3BEYY8BbcA7lPAa45uCSFaYIbpQpBd7TAX7zcNEJMypEBxFKBJxDvMUYQ5DpLBNjm8pa/tI7lPcrj7i/587BSqZuyzC2Jc4lQTPudDHmG7TO0Jr/qcGY02JtM\u002BgNAgYGVh3FmFNitBajuUcNxnyPc59kaSoqXx\u002Bh/vY7YdZNt4n4N0TYBfTf/qPcgbZSTKCCw0pxduHQAatuJuXHtlPd84ICqijV88\u002B9OyCSAE3b6fg/Pj2MXZjnTyZbpCugbyrKAAAAAElFTkSuQmCC",
+              "WhenOpened": "2025-10-05T18:44:22.349Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "robot_orientation.py",
+              "DocumentMoniker": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\robot_orientation.py",
+              "RelativeDocumentMoniker": "python code\\robot_orientation.py",
+              "ToolTip": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\robot_orientation.py",
+              "RelativeToolTip": "python code\\robot_orientation.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAALAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-05T18:28:12.445Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "leg.py",
+              "DocumentMoniker": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\leg.py",
+              "RelativeDocumentMoniker": "python code\\leg.py",
+              "ToolTip": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\leg.py",
+              "RelativeToolTip": "python code\\leg.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-05T16:44:49.865Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "robot.py",
+              "DocumentMoniker": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\robot.py",
+              "RelativeDocumentMoniker": "python code\\robot.py",
+              "ToolTip": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\robot.py",
+              "RelativeToolTip": "python code\\robot.py",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAIwBsAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-05T16:32:42.808Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "controller.py",
+              "DocumentMoniker": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\controller.py",
+              "RelativeDocumentMoniker": "python code\\controller.py",
+              "ToolTip": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\controller.py",
+              "RelativeToolTip": "python code\\controller.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC8AAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-05T18:31:13.775Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "orientation.py",
+              "DocumentMoniker": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\orientation.py",
+              "RelativeDocumentMoniker": "python code\\orientation.py",
+              "ToolTip": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\orientation.py",
+              "RelativeToolTip": "python code\\orientation.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-05T18:54:29.536Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": ".gitignore",
+              "DocumentMoniker": "C:\\Users\\harrison.milburn\\robot-dog-project\\.gitignore",
+              "RelativeDocumentMoniker": ".gitignore",
+              "ToolTip": "C:\\Users\\harrison.milburn\\robot-dog-project\\.gitignore",
+              "RelativeToolTip": ".gitignore",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-10-05T19:24:12.815Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "main.py",
+              "DocumentMoniker": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\main.py",
+              "RelativeDocumentMoniker": "python code\\main.py",
+              "ToolTip": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\main.py",
+              "RelativeToolTip": "python code\\main.py",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-05T16:27:39.026Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "hardware_imports.py",
+              "DocumentMoniker": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\hardware_imports.py",
+              "RelativeDocumentMoniker": "python code\\hardware_imports.py",
+              "ToolTip": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\hardware_imports.py",
+              "RelativeToolTip": "python code\\hardware_imports.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-05T16:33:46.77Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "servo.py",
+              "DocumentMoniker": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\mock_lib\\servo.py",
+              "RelativeDocumentMoniker": "python code\\mock_lib\\servo.py",
+              "ToolTip": "C:\\Users\\harrison.milburn\\robot-dog-project\\python code\\mock_lib\\servo.py",
+              "RelativeToolTip": "python code\\mock_lib\\servo.py",
+              "ViewState": "AgIAABIAAAAAAAAAAAAAADAAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-05T16:34:16.111Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
