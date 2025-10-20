@@ -14,10 +14,10 @@ foot_color = GREEN
 
 class FirstScene(Scene):
     def construct(self):
-        servo_1_centre = Dot(color=thigh_color).shift(LEFT * 1).shift(UP * 1)
-        servo_2_centre = Dot(color=thigh_color).shift(RIGHT * 1).shift(UP * 1)
+        servo_1_centre = Dot(color=thigh_color).shift(LEFT * 1).shift(UP * 2)
+        servo_2_centre = Dot(color=thigh_color).shift(RIGHT * 1).shift(UP * 2)
         
-        foot = Dot(color=foot_color).shift(DOWN * 1.5)
+        foot = Dot(color=foot_color).shift(DOWN * 0.5)
         foot_dashed_circle = self.get_dotted_circle(foot.get_center(), calf_length, foot_color)
         foot_circle = Circle(radius=calf_length, color=foot_color).move_to(foot.get_center())
 
@@ -28,32 +28,35 @@ class FirstScene(Scene):
 
         self.add(servo_1_centre, servo_2_centre, foot, thigh_1_dashed_circle, thigh_2_dashed_circle, foot_dashed_circle)
 
-        intersection_points_1 = self.intersection_between_circles(thigh_1_circle, foot_circle)
-        for point in intersection_points_1:
-            self.add(point)
-            
-            thigh = Line(servo_1_centre.get_center(), point.get_center(), color=YELLOW)
-            self.add(thigh)
+        servo_1_intersection_points = self.intersection_between_circles(thigh_1_circle, foot_circle)
+        servo_2_intersection_points = self.intersection_between_circles(thigh_2_circle, foot_circle)
 
-            calf = Line(foot.get_center(), point.get_center(), color=foot_color)
-            self.add(calf)
+        intersection_point_1 = servo_1_intersection_points[0]
+        intersection_point_2 = servo_2_intersection_points[1]
 
-        intersection_points_2 = self.intersection_between_circles(thigh_2_circle, foot_circle)
-        for point in intersection_points_2:
-            self.add(point)
-            thigh = Line(servo_2_centre.get_center(), point.get_center(), color=YELLOW)
-            self.add(thigh)
+        thigh1 = Line(servo_1_centre.get_center(), intersection_point_1.get_center(), color=thigh_color)
+        thigh2 = Line(servo_2_centre.get_center(), intersection_point_2.get_center(), color=thigh_color)
 
-            calf = Line(foot.get_center(), point.get_center(), color=foot_color)
-            self.add(calf)
+        calf1 = Line(foot.get_center(), intersection_point_1, color=foot_color)
+        calf2 = Line(foot.get_center(), intersection_point_2, color=foot_color)
 
-        thigh_1 = self.get_thigh_line(servo_1_centre, 225)
-        thigh_2 = self.get_thigh_line(servo_2_centre, 315)
+        self.add(intersection_point_1, 
+                 intersection_point_2, 
+                 thigh1, 
+                 thigh2, 
+                 calf1, 
+                 calf2, 
+                 servo_1_centre, 
+                 servo_2_centre, 
+                 foot, 
+                 thigh_1_dashed_circle, 
+                 thigh_2_dashed_circle, 
+                 foot_dashed_circle
+                 )
+        
+        self.wait(2)
 
-        calf_2 = Line(thigh_2.get_end(), foot.get_center(), color=foot_color)
-        calf_1 = Line(thigh_1.get_end(), foot.get_center(), color=foot_color)
-
-        self.wait(25000)
+        # self.wait(25000)
 
     def get_thigh_line(self, servo_centre, thigh_angle):
         thigh_end_x = servo_centre.get_x() + thigh_length * math.cos(math.radians(thigh_angle))
