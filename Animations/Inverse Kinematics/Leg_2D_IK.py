@@ -2,19 +2,22 @@ import manim
 from manim import *
 import math
 
-thigh_length = 1
-calf_length = 3
+thigh_length = 30/23
+calf_length = 120/23
+hip_seperation = 2
+hip_height = 2
 
 thigh_color = BLUE
 foot_color = GREEN
 
 class FirstScene(Scene):
     def construct(self):
-        hip1 = Dot(color=thigh_color).shift(LEFT * 1).shift(UP * 2)
-        hip2 = Dot(color=thigh_color).shift(RIGHT * 1).shift(UP * 2)
+        hip1 = Dot([-hip_seperation/2, hip_height, 0], color=thigh_color)
+        hip2 = Dot([hip_seperation/2, hip_height, 0], color=thigh_color)
         
-        foot = Dot(color=foot_color).shift(DOWN * 1)
-        foot_path_line1 = Line(foot.get_center(), [1.5, -1, 0])
+        foot = Dot([0, -3, 0], color=foot_color)
+        foot_path_circle = Circle(radius = 1).move_to(foot.get_center())
+        path = self.get_path()
         
         foot_circle = Circle(radius=calf_length, color=foot_color).move_to(foot.get_center())
         thigh_1_circle = Circle(radius=thigh_length, color=thigh_color).move_to(hip1.get_center())
@@ -37,15 +40,17 @@ class FirstScene(Scene):
                   Create(thigh_2_circle.rotate(PI + thigh2.get_angle()), rate_func=smooth),
                   run_time=2)
         
+        self.play(FadeIn(inter1), FadeIn(inter2))
+        
         self.play(FadeIn(foot))
         self.play(Create(foot_circle))
-
-        self.play(FadeIn(inter1), FadeIn(inter2))
+       
         self.play(Create(calf1), Create(calf2))
 
         self.play(FadeOut(foot_circle, thigh_1_circle, thigh_2_circle))
 
-        self.play(MoveAlongPath(foot, foot_path_line1), run_time=8)
+        self.play(foot.animate.move_to(path.get_start()))
+        self.play(MoveAlongPath(foot, path), run_time=8, rate_func=linear)
 
 
         
@@ -54,6 +59,24 @@ class FirstScene(Scene):
            
 
         self.wait(5)
+
+
+    def get_path(self):
+        x_range = (-1.5, 1.5)
+        y_range = (-3, -2)
+        num_points = np.random.randint(8, 15)
+
+        def random_point(x_range, y_range):
+            x = np.random.uniform(*x_range)
+            y = np.random.uniform(*y_range)
+            return np.array([x, y, 0])
+
+        points = [random_point(x_range, y_range) for _ in range(num_points)]
+
+        path = VMobject()
+        path.set_points_smoothly(points)
+
+        return path
 
 
     def get_leg_parts(self, foot:Dot, hip1:Dot, hip2:Dot):
