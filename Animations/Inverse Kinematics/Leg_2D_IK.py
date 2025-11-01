@@ -1,80 +1,93 @@
 import manim
 from manim import *
-from manim import config
 import math
 
-config["fullscreen"] = True
-config["window_monitor"] = 1  # Change this to the monitor number you want to use (starting from 1)
-
 thigh_length = 1
-calf_length = 2
+calf_length = 3
 
 thigh_color = BLUE
 foot_color = GREEN
 
 class FirstScene(Scene):
     def construct(self):
-        servo_1_centre = Dot(color=thigh_color).shift(LEFT * 1).shift(UP * 2)
-        servo_2_centre = Dot(color=thigh_color).shift(RIGHT * 1).shift(UP * 2)
+        hip1 = Dot(color=thigh_color).shift(LEFT * 1).shift(UP * 2)
+        hip2 = Dot(color=thigh_color).shift(RIGHT * 1).shift(UP * 2)
         
-        foot = Dot(color=foot_color).shift(DOWN * 0.5)
-        foot_dashed_circle = self.get_dotted_circle(foot.get_center(), calf_length, foot_color)
+        foot = Dot(color=foot_color).shift(DOWN * 1)
+        foot_path_line1 = Line(foot.get_center(), [1.5, -1, 0])
+        
         foot_circle = Circle(radius=calf_length, color=foot_color).move_to(foot.get_center())
-
-        thigh_1_dashed_circle = self.get_dotted_circle(servo_1_centre.get_center(), thigh_length, thigh_color)
-        thigh_2_dashed_circle = self.get_dotted_circle(servo_2_centre.get_center(), thigh_length, thigh_color)
-        thigh_1_circle = Circle(radius=thigh_length, color=thigh_color).move_to(servo_1_centre.get_center())
-        thigh_2_circle = Circle(radius=thigh_length, color=thigh_color).move_to(servo_2_centre.get_center())
-
-        self.add(servo_1_centre, servo_2_centre, foot, thigh_1_dashed_circle, thigh_2_dashed_circle, foot_dashed_circle)
-
-        servo_1_intersection_points = self.intersection_between_circles(thigh_1_circle, foot_circle)
-        servo_2_intersection_points = self.intersection_between_circles(thigh_2_circle, foot_circle)
-
-        intersection_point_1 = servo_1_intersection_points[0]
-        intersection_point_2 = servo_2_intersection_points[1]
-
-        thigh1 = Line(servo_1_centre.get_center(), intersection_point_1.get_center(), color=thigh_color)
-        thigh2 = Line(servo_2_centre.get_center(), intersection_point_2.get_center(), color=thigh_color)
-
-        calf1 = Line(foot.get_center(), intersection_point_1, color=foot_color)
-        calf2 = Line(foot.get_center(), intersection_point_2, color=foot_color)
-
-        self.add(intersection_point_1, 
-                 intersection_point_2, 
-                 thigh1, 
-                 thigh2, 
-                 calf1, 
-                 calf2, 
-                 servo_1_centre, 
-                 servo_2_centre, 
-                 foot, 
-                 thigh_1_dashed_circle, 
-                 thigh_2_dashed_circle, 
-                 foot_dashed_circle
-                 )
+        thigh_1_circle = Circle(radius=thigh_length, color=thigh_color).move_to(hip1.get_center())
+        thigh_2_circle = Circle(radius=thigh_length, color=thigh_color).move_to(hip2.get_center()).flip()
         
-        self.wait(2)
+        thigh1 = always_redraw(lambda: self.get_leg_parts(foot, hip1, hip2)[0])
+        thigh2 = always_redraw(lambda: self.get_leg_parts(foot, hip1, hip2)[1])
+        calf1 = always_redraw(lambda: self.get_leg_parts(foot, hip1, hip2)[2])
+        calf2 = always_redraw(lambda: self.get_leg_parts(foot, hip1, hip2)[3])
+        inter1 = always_redraw(lambda: self.get_leg_parts(foot, hip1, hip2)[4])
+        inter2 = always_redraw(lambda: self.get_leg_parts(foot, hip1, hip2)[5])
+        
+        
 
-        # self.wait(25000)
+        self.play(FadeIn(hip1), FadeIn(hip2))
+        self.play(Create(thigh1), Create(thigh2))
+        self.play(Rotate(thigh1, angle=2*PI, about_point=hip1.get_center(), rate_func=smooth),
+                  Create(thigh_1_circle.rotate(thigh1.get_angle()), rate_func=smooth),
+                  Rotate(thigh2, angle=-2*PI, about_point=hip2.get_center(), rate_func=smooth),
+                  Create(thigh_2_circle.rotate(PI + thigh2.get_angle()), rate_func=smooth),
+                  run_time=2)
+        
+        self.play(FadeIn(foot))
+        self.play(Create(foot_circle))
+
+        self.play(FadeIn(inter1), FadeIn(inter2))
+        self.play(Create(calf1), Create(calf2))
+
+        self.play(FadeOut(foot_circle, thigh_1_circle, thigh_2_circle))
+
+        self.play(MoveAlongPath(foot, foot_path_line1), run_time=8)
+
+
+        
+        
+        
+           
+
+        self.wait(5)
+
+
+    def get_leg_parts(self, foot:Dot, hip1:Dot, hip2:Dot):
+        foot_circle = Circle(radius=calf_length).move_to(foot.get_center())
+        thigh1_circle = Circle(radius=thigh_length).move_to(hip1.get_center())
+        thigh2_circle = Circle(radius=thigh_length).move_to(hip2.get_center())
+
+        # Find intersection points
+        try:
+            inter1 = self.intersection_between_circles(thigh1_circle, foot_circle)[0]
+            inter2 = self.intersection_between_circles(thigh2_circle, foot_circle)[1]
+        except ValueError:
+            inter1 = Dot(ORIGIN, color=YELLOW)
+            inter2 = Dot(ORIGIN, color=YELLOW)
+
+        # Lines
+        thigh1_line = Line(hip1.get_center(), inter1.get_center(), color=BLUE)
+        thigh2_line = Line(hip2.get_center(), inter2.get_center(), color=BLUE)
+        calf1_line = Line(foot.get_center(), inter1.get_center(), color=GREEN)
+        calf2_line = Line(foot.get_center(), inter2.get_center(), color=GREEN)
+
+        return thigh1_line, thigh2_line, calf1_line, calf2_line, inter1, inter2
+
+
+
+    def deg_to_rad(self, degrees):
+        return degrees * (math.pi / 180)
+
 
     def get_thigh_line(self, servo_centre, thigh_angle):
         thigh_end_x = servo_centre.get_x() + thigh_length * math.cos(math.radians(thigh_angle))
         thigh_end_y = servo_centre.get_y() + thigh_length * math.sin(math.radians(thigh_angle))
         thigh_end = np.array([thigh_end_x, thigh_end_y, 0])
         return Line(servo_centre.get_center(), thigh_end, color=thigh_color)
-
-    def get_dotted_circle(self, centre, radius, colour):
-        base_circle = Circle(radius=radius, color=colour).move_to(centre)
-
-        dotted_circle = DashedVMobject(
-            base_circle,
-            num_dashes=30,
-            dash_length=0.1,
-            dashed_ratio=0.5,
-            stroke_width=2,
-        )
-        return dotted_circle
 
     def intersection_between_circles(self, circle1: Circle, circle2: Circle):
         (x0, y0), r0 = circle1.get_center()[:2], circle1.radius
