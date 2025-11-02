@@ -14,15 +14,17 @@ koda.stand()
 
 koda.set_speed(Speed.in_mm_per_second(20))
 
-koda.set_gait(Gait.TROT, Direction.FORWARDS)
-koda.go_for_steps(10)
-time.sleep(1)
+for x in range (5):
 
-koda.set_gait(Gait.TROT, Direction.BACKWARDS)
-koda.go_for_steps(10)
-time.sleep(1)
+    koda.set_gait(Gait.TROT, Direction.FORWARDS)
+    koda.go_for_steps(10)
+    time.sleep(1)
 
-koda.rotation_test(1)
-koda.translation_test(1)
+    koda.set_gait(Gait.TROT, Direction.BACKWARDS)
+    koda.go_for_steps(10)
+    time.sleep(1)
+
+# koda.rotation_test(1)
+# koda.translation_test(1)
 
 koda.sleep()
