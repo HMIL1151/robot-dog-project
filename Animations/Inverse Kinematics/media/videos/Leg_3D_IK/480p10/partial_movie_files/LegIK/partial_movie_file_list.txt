@@ -1,0 +1,6 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/harrison.milburn/repos/robot-dog-project/Animations/Inverse Kinematics/media/videos/Leg_3D_IK/480p10/partial_movie_files/LegIK/1943310216_1717607832_223132457.mp4'
+file 'file:C:/Users/harrison.milburn/repos/robot-dog-project/Animations/Inverse Kinematics/media/videos/Leg_3D_IK/480p10/partial_movie_files/LegIK/3788689506_2230675760_3413689081.mp4'
+file 'file:C:/Users/harrison.milburn/repos/robot-dog-project/Animations/Inverse Kinematics/media/videos/Leg_3D_IK/480p10/partial_movie_files/LegIK/2006508174_2417469432_3017558749.mp4'
+file 'file:C:/Users/harrison.milburn/repos/robot-dog-project/Animations/Inverse Kinematics/media/videos/Leg_3D_IK/480p10/partial_movie_files/LegIK/843898363_1391221601_3651725256.mp4'
+file 'file:C:/Users/harrison.milburn/repos/robot-dog-project/Animations/Inverse Kinematics/media/videos/Leg_3D_IK/480p10/partial_movie_files/LegIK/843898363_2230675760_546144238.mp4'
