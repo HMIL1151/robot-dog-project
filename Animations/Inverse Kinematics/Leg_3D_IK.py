@@ -117,8 +117,6 @@ class LegIK(ThreeDScene):
 
         servo_line = Line3D(servo1.get_center(), servo2.get_center(), color=PINK)
 
-       
-
         foot_x_y_plane_normal_vector = self.get_plane_normal(foot.get_center(), servo1.get_center(), servo2.get_center())
         servo1_circle = self.circle_parallel_to_plane(servo1.get_center(), foot_x_y_plane_normal_vector, radius=thigh_length, color=thigh_color)
         servo2_circle = self.circle_parallel_to_plane(servo2.get_center(), foot_x_y_plane_normal_vector, radius=thigh_length, color=thigh_color)
