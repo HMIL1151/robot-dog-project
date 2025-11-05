@@ -1,6 +1,7 @@
 import manim
 from manim import *
 import math
+import numpy as np
 
 thigh_length = 30/23
 calf_length = 120/23
@@ -55,10 +56,13 @@ class LegIK(ThreeDScene):
         servo1 = always_redraw(lambda: self.get_leg(foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)[4])
         servo2 = always_redraw(lambda: self.get_leg(foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)[5])
         servo_line = always_redraw(lambda: self.get_leg(foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)[6])
+        servo1_circle = always_redraw(lambda: self.get_leg(foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)[7])
+        servo2_circle = always_redraw(lambda: self.get_leg(foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)[8])
+        foot_circle = always_redraw(lambda: self.get_leg(foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)[9])
 
         torso_line = Line3D(waist.get_center(), torso.get_center(), color=PURPLE)
 
-        self.play(FadeIn(servo_centre_point), FadeIn(foot), FadeIn(waist), FadeIn(torso), FadeIn(servo1), FadeIn(servo2), FadeIn(foot_servo_line), FadeIn(servo_waist_line), FadeIn(torso_line), FadeIn(servo_line))
+        self.play(FadeIn(servo_centre_point), FadeIn(foot), FadeIn(waist), FadeIn(torso), FadeIn(servo1), FadeIn(servo2), FadeIn(foot_servo_line), FadeIn(servo_waist_line), FadeIn(torso_line), FadeIn(servo_line), FadeIn(servo1_circle), FadeIn(servo2_circle), FadeIn(foot_circle))
 
         self.wait(2)
 
@@ -68,16 +72,16 @@ class LegIK(ThreeDScene):
             foot_y_tracker.set_value(foot_y + radius * math.cos(angle))
             foot_z_tracker.set_value(foot_z - hip_seperation/2 + radius * math.sin(angle))
 
-        self.move_camera(
-                phi=0, theta=-PI/2, gamma=0, run_time=4,
-                added_anims=[UpdateFromAlphaFunc(foot, update_foot_path)]
-            )
+        # self.move_camera(
+        #         phi=0, theta=-PI/2, gamma=0, run_time=4,
+        #         added_anims=[UpdateFromAlphaFunc(foot, update_foot_path)]
+        #     )
 
         self.play(UpdateFromAlphaFunc(foot, update_foot_path), run_time=4)
 
-        # self.wait(2)
+        self.wait(2)
 
-        # self.move_camera(phi=0, theta=-PI/2, gamma=0, run_time=3)
+        self.move_camera(phi=0, theta=-PI/2, gamma=0, run_time=3)
         self.wait(2)
 
 
@@ -113,13 +117,43 @@ class LegIK(ThreeDScene):
 
         servo_line = Line3D(servo1.get_center(), servo2.get_center(), color=PINK)
 
-        return servo_centre_point, foot_servo_line, servo_waist_line, foot, servo1, servo2, servo_line
+       
+
+        foot_x_y_plane_normal_vector = self.get_plane_normal(foot.get_center(), servo1.get_center(), servo2.get_center())
+        servo1_circle = self.circle_parallel_to_plane(servo1.get_center(), foot_x_y_plane_normal_vector, radius=thigh_length, color=thigh_color)
+        servo2_circle = self.circle_parallel_to_plane(servo2.get_center(), foot_x_y_plane_normal_vector, radius=thigh_length, color=thigh_color)
+        foot_circle = self.circle_parallel_to_plane(foot.get_center(), foot_x_y_plane_normal_vector, radius=calf_length, color=foot_color)
 
 
-    def solve_quadratic(self, a, b, c):
+        return servo_centre_point, foot_servo_line, servo_waist_line, foot, servo1, servo2, servo_line, servo1_circle, servo2_circle, foot_circle
+
+    @staticmethod
+    def solve_quadratic(a, b, c):
         discriminant = b**2 - 4*a*c
         if discriminant < 0:
             raise ValueError("No real roots found")
         root1 = (-b + math.sqrt(discriminant)) / (2*a)
         root2 = (-b - math.sqrt(discriminant)) / (2*a)
         return root1, root2
+    
+    @staticmethod
+    def get_plane_normal(p1, p2, p3):
+        # p1, p2, p3 are 3D points (numpy arrays or lists)
+        v1 = np.array(p2) - np.array(p1)
+        v2 = np.array(p3) - np.array(p1)
+        normal = np.cross(v1, v2)
+        normal = normal / np.linalg.norm(normal)  # Normalize
+        return normal
+    
+    @staticmethod
+    def circle_parallel_to_plane(center_point, normal_vector, radius=1, color=WHITE):
+        circle = Circle(radius=radius, color=color)
+        # Default normal is [0, 0, 1] (z-axis)
+        default_normal = np.array([0, 0, 1])
+        n = np.array(normal_vector) / np.linalg.norm(normal_vector)
+        axis = np.cross(default_normal, n)
+        angle = np.arccos(np.dot(default_normal, n))
+        if np.linalg.norm(axis) > 1e-6:
+            circle.rotate(angle, axis=axis)
+        circle.move_to(center_point)
+        return circle
