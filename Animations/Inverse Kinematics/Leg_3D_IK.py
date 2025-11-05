@@ -155,3 +155,9 @@ class LegIK(ThreeDScene):
             circle.rotate(angle, axis=axis)
         circle.move_to(center_point)
         return circle
+    
+
+
+
+
+    
