@@ -36,7 +36,7 @@ class LegIK(ThreeDScene):
         views = CameraViews(
             front=dict(phi=0, theta=-PI/2),
             side=dict(phi=PI/2, theta=0, gamma=PI/2),
-            isometric=dict(phi=PI/4, theta=-PI/4, gamma=0)
+            isometric=dict(phi=PI/3, theta=PI/5, gamma=2.45*PI/4)
         )
 
         aspect_ratio = 16/9
@@ -44,8 +44,11 @@ class LegIK(ThreeDScene):
         self.camera.frame_width = 30
         self.camera.frame_height = self.camera.frame_width / aspect_ratio
 
-        self.set_camera_orientation(**views.front)
-        self.set_camera_orientation(**views.side, focal_distance=1000, frame_center=ORIGIN, run_time=3)
+        self.axes = ThreeDAxes()
+        self.add(self.axes)
+
+        self.set_camera_orientation(**views.isometric)
+        #self.set_camera_orientation(**views.side, focal_distance=1000, frame_center=ORIGIN, run_time=3)
 
         waist = Sphere([0, hip_height, 0], radius=DEFAULT_DOT_RADIUS)
         torso = Sphere([0, hip_height, -hip_seperation/2], radius=DEFAULT_DOT_RADIUS)
@@ -73,11 +76,13 @@ class LegIK(ThreeDScene):
 
         torso_line = Line3D(waist.get_center(), torso.get_center(), color=PURPLE)
 
-        self.add(servo_centre_point, foot, waist, torso, servo1, servo2, foot_servo_line, servo_waist_line, torso_line, servo_line, servo1_circle, servo2_circle, foot_circle, calf1_line, calf2_line, servo1_line, servo2_line)
+        self.add(servo_centre_point, foot, waist, torso, servo1, servo2, servo_waist_line, torso_line, servo_line, calf1_line, calf2_line, servo1_line, servo2_line)
+
+        #self.wait(2)
 
         #self.play(FadeIn(servo_centre_point), FadeIn(foot), FadeIn(waist), FadeIn(torso), FadeIn(servo1), FadeIn(servo2), FadeIn(foot_servo_line), FadeIn(servo_waist_line), FadeIn(torso_line), FadeIn(servo_line), FadeIn(servo1_circle), FadeIn(servo2_circle), FadeIn(foot_circle), FadeIn(calf1_line), FadeIn(calf2_line), FadeIn(servo1_line), FadeIn(servo2_line))
 
-        #self.wait(2)
+        self.wait(2)
 
         def update_foot_path(mob, alpha):
             radius = 0.5
@@ -86,16 +91,14 @@ class LegIK(ThreeDScene):
             foot_x_tracker.set_value(foot_x + radius * math.sin(angle))
 
         # self.move_camera(
-        #         phi=0, theta=-PI/2, gamma=0, run_time=4,
+        #         phi=0, theta=-PI/2, gamma=0, run_time=8,
         #         added_anims=[UpdateFromAlphaFunc(foot, update_foot_path)]
         #     )
 
-        #self.play(UpdateFromAlphaFunc(foot, update_foot_path), run_time=4)
+        self.play(UpdateFromAlphaFunc(foot, update_foot_path), run_time=8)
 
-        # self.wait(2)
-
-        self.move_camera(phi=0, theta=-PI/2, gamma=0, run_time=3)
         self.wait(2)
+
 
 
     def get_y_prime_theta_h(self, foot_y: float, foot_z: float):
@@ -156,7 +159,7 @@ class LegIK(ThreeDScene):
         calf2_line = Line3D(foot.get_center(), inter2.get_center(), color=GREEN)
 
 
-        return servo_centre_point, foot_servo_line, servo_waist_line, foot, servo1, servo2, servo_line, servo1_circle, servo2_circle, foot_circle, calf1_line, calf2_line, servo1_line, servo2_line
+        return servo_centre_point, servo_waist_line, foot_servo_line, foot, servo1, servo2, servo_line, servo1_circle, servo2_circle, foot_circle, calf1_line, calf2_line, servo1_line, servo2_line
 
     @staticmethod
     def intersection_between_circles_3d(circle1: Circle, circle2: Circle):
