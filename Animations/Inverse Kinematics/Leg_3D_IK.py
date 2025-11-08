@@ -8,13 +8,15 @@ calf_length = 120/23
 hip_height = 0
 hip_seperation = 85/23
 
+ZERO_X = 0
+ZERO_Y = 150/23
+ZERO_Z = 95.5/23
+
 foot_z = 95.5/23
-foot_y = -135/23
+foot_y = -ZERO_Y
 foot_x = 0
 
-ZERO_X = 0
-ZERO_Y = 135/23
-ZERO_Z = 95.5/23
+
 
 theta_hips = 100.27*DEGREES
 a = 53.863/23
@@ -23,24 +25,27 @@ thigh_color = BLUE
 foot_color = GREEN
 waist_color = RED
 
+class CameraViews:
+    def __init__(self, front, side, isometric):
+        self.front = front
+        self.side = side
+        self.isometric = isometric
+
 class LegIK(ThreeDScene):
     def construct(self):
+        views = CameraViews(
+            front=dict(phi=0, theta=-PI/2),
+            side=dict(phi=PI/2, theta=0, gamma=PI/2),
+            isometric=dict(phi=PI/4, theta=-PI/4, gamma=0)
+        )
+
         aspect_ratio = 16/9
 
         self.camera.frame_width = 30
         self.camera.frame_height = self.camera.frame_width / aspect_ratio
 
-        #front on view
-        self.set_camera_orientation(phi=0, theta=-PI/2)
-        self.set_camera_orientation(phi=PI/2, theta=0, gamma=PI/2, focal_distance=1000, frame_center=ORIGIN, run_time=3)
-
-        # axes = ThreeDAxes()
-        # axes.add(
-        #     axes.get_x_axis_label(("x")),
-        #     axes.get_y_axis_label(("y")),
-        #     axes.get_z_axis_label(("z"))
-        # )
-        # self.add(axes)
+        self.set_camera_orientation(**views.front)
+        self.set_camera_orientation(**views.side, focal_distance=1000, frame_center=ORIGIN, run_time=3)
 
         waist = Sphere([0, hip_height, 0], radius=DEFAULT_DOT_RADIUS)
         torso = Sphere([0, hip_height, -hip_seperation/2], radius=DEFAULT_DOT_RADIUS)
@@ -49,37 +54,45 @@ class LegIK(ThreeDScene):
         foot_y_tracker = ValueTracker(foot_y)
         foot_z_tracker = ValueTracker(foot_z - hip_seperation/2)
 
-        servo_centre_point = always_redraw(lambda: self.get_leg(foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)[0])
-        servo_waist_line = always_redraw(lambda: self.get_leg(foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)[1])
-        foot_servo_line = always_redraw(lambda: self.get_leg(foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)[2])
-        foot = always_redraw(lambda: self.get_leg(foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)[3])
-        servo1 = always_redraw(lambda: self.get_leg(foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)[4])
-        servo2 = always_redraw(lambda: self.get_leg(foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)[5])
-        servo_line = always_redraw(lambda: self.get_leg(foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)[6])
-        servo1_circle = always_redraw(lambda: self.get_leg(foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)[7])
-        servo2_circle = always_redraw(lambda: self.get_leg(foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)[8])
-        foot_circle = always_redraw(lambda: self.get_leg(foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)[9])
+        leg = lambda: (foot_x_tracker.get_value(), foot_y_tracker.get_value(), foot_z_tracker.get_value(), waist)
+
+        servo_centre_point = always_redraw(lambda: self.get_leg(leg())[0])
+        servo_waist_line =  always_redraw(lambda: self.get_leg(leg())[1])
+        foot_servo_line = always_redraw(lambda: self.get_leg(leg())[2])
+        foot = always_redraw(lambda: self.get_leg(leg())[3])
+        servo1 = always_redraw(lambda: self.get_leg(leg())[4])
+        servo2 = always_redraw(lambda: self.get_leg(leg())[5])
+        servo_line = always_redraw(lambda: self.get_leg(leg())[6])
+        servo1_circle = always_redraw(lambda: self.get_leg(leg())[7])
+        servo2_circle = always_redraw(lambda: self.get_leg(leg())[8])
+        foot_circle = always_redraw(lambda: self.get_leg(leg())[9])
+        calf1_line = always_redraw(lambda: self.get_leg(leg())[10])
+        calf2_line = always_redraw(lambda: self.get_leg(leg())[11])
+        servo1_line = always_redraw(lambda: self.get_leg(leg())[12])
+        servo2_line = always_redraw(lambda: self.get_leg(leg())[13])
 
         torso_line = Line3D(waist.get_center(), torso.get_center(), color=PURPLE)
 
-        self.play(FadeIn(servo_centre_point), FadeIn(foot), FadeIn(waist), FadeIn(torso), FadeIn(servo1), FadeIn(servo2), FadeIn(foot_servo_line), FadeIn(servo_waist_line), FadeIn(torso_line), FadeIn(servo_line), FadeIn(servo1_circle), FadeIn(servo2_circle), FadeIn(foot_circle))
+        self.add(servo_centre_point, foot, waist, torso, servo1, servo2, foot_servo_line, servo_waist_line, torso_line, servo_line, servo1_circle, servo2_circle, foot_circle, calf1_line, calf2_line, servo1_line, servo2_line)
 
-        self.wait(2)
+        #self.play(FadeIn(servo_centre_point), FadeIn(foot), FadeIn(waist), FadeIn(torso), FadeIn(servo1), FadeIn(servo2), FadeIn(foot_servo_line), FadeIn(servo_waist_line), FadeIn(torso_line), FadeIn(servo_line), FadeIn(servo1_circle), FadeIn(servo2_circle), FadeIn(foot_circle), FadeIn(calf1_line), FadeIn(calf2_line), FadeIn(servo1_line), FadeIn(servo2_line))
+
+        #self.wait(2)
 
         def update_foot_path(mob, alpha):
-            radius = 1.5
+            radius = 0.5
             angle = alpha * 2 * PI
             foot_y_tracker.set_value(foot_y + radius * math.cos(angle))
-            foot_z_tracker.set_value(foot_z - hip_seperation/2 + radius * math.sin(angle))
+            foot_x_tracker.set_value(foot_x + radius * math.sin(angle))
 
         # self.move_camera(
         #         phi=0, theta=-PI/2, gamma=0, run_time=4,
         #         added_anims=[UpdateFromAlphaFunc(foot, update_foot_path)]
         #     )
 
-        self.play(UpdateFromAlphaFunc(foot, update_foot_path), run_time=4)
+        #self.play(UpdateFromAlphaFunc(foot, update_foot_path), run_time=4)
 
-        self.wait(2)
+        # self.wait(2)
 
         self.move_camera(phi=0, theta=-PI/2, gamma=0, run_time=3)
         self.wait(2)
@@ -103,9 +116,14 @@ class LegIK(ThreeDScene):
         theta_h = PI-theta_c - theta_d
         return y_prime[0], theta_h
 
-    def get_leg(self, foot_x, foot_y, foot_z, waist):
+    def get_leg(self, leg):
+        foot_x = leg[0]
+        foot_y = leg[1]
+        foot_z = leg[2]
+        waist = leg[3]
+
         y_prime, theta_h = self.get_y_prime_theta_h(foot_y, foot_z)
-        servo_centre_point = Sphere([foot_x, foot_y + y_prime*math.sin(theta_h), foot_z + y_prime*math.cos(theta_h) - hip_seperation/2], radius=DEFAULT_DOT_RADIUS)
+        servo_centre_point = Sphere([waist.get_center()[0], foot_y + y_prime*math.sin(theta_h), foot_z + y_prime*math.cos(theta_h) - hip_seperation/2], radius=DEFAULT_DOT_RADIUS)
 
         foot_servo_line = Line3D([foot_x, foot_y, foot_z], servo_centre_point.get_center(), color=YELLOW)
         servo_waist_line = Line3D(servo_centre_point.get_center(), waist.get_center(), color=ORANGE)
@@ -122,8 +140,44 @@ class LegIK(ThreeDScene):
         servo2_circle = self.circle_parallel_to_plane(servo2.get_center(), foot_x_y_plane_normal_vector, radius=thigh_length, color=thigh_color)
         foot_circle = self.circle_parallel_to_plane(foot.get_center(), foot_x_y_plane_normal_vector, radius=calf_length, color=foot_color)
 
+        foot_circle = Circle(radius=calf_length).move_to(foot.get_center())
+        servo1_circle = Circle(radius=thigh_length).move_to(servo1.get_center())
+        servo2_circle = Circle(radius=thigh_length).move_to(servo2.get_center())
 
-        return servo_centre_point, foot_servo_line, servo_waist_line, foot, servo1, servo2, servo_line, servo1_circle, servo2_circle, foot_circle
+        try:
+            inter1 = self.intersection_between_circles_3d(servo1_circle, foot_circle)[1]
+            inter2 = self.intersection_between_circles_3d(servo2_circle, foot_circle)[0]
+        except ValueError:
+            raise ValueError("No intersection points between the circles")
+
+        servo1_line = Line3D(servo1.get_center(), inter1.get_center(), color=BLUE)
+        servo2_line = Line3D(servo2.get_center(), inter2.get_center(), color=BLUE)
+        calf1_line = Line3D(foot.get_center(), inter1.get_center(), color=GREEN)
+        calf2_line = Line3D(foot.get_center(), inter2.get_center(), color=GREEN)
+
+
+        return servo_centre_point, foot_servo_line, servo_waist_line, foot, servo1, servo2, servo_line, servo1_circle, servo2_circle, foot_circle, calf1_line, calf2_line, servo1_line, servo2_line
+
+    @staticmethod
+    def intersection_between_circles_3d(circle1: Circle, circle2: Circle):
+        (x0, y0, z0), r0 = circle1.get_center(), circle1.radius
+        (x1, y1, z1), r1 = circle2.get_center(), circle2.radius
+
+        d = math.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2 + (z1 - z0) ** 2)
+        if d > (r0 + r1) or d < abs(r0 - r1):
+            raise ValueError("No intersection points between the circles")
+        a = (r0 ** 2 - r1 ** 2 + d ** 2) / (2 * d)
+        h = math.sqrt(r0 ** 2 - a ** 2)
+        x2 = x0 + a * (x1 - x0) / d
+        y2 = y0 + a * (y1 - y0) / d
+        z2 = z0 + a * (z1 - z0) / d
+
+        rx = -(y1 - y0) * (h / d)
+        ry = (x1 - x0) * (h / d)
+        intersection_point_1 = Dot(point=np.array([x2 + rx, y2 + ry, z2]), color=YELLOW)
+        intersection_point_2 = Dot(point=np.array([x2 - rx, y2 - ry, z2]), color=YELLOW)
+        return (intersection_point_1, intersection_point_2)
+    
 
     @staticmethod
     def solve_quadratic(a, b, c):

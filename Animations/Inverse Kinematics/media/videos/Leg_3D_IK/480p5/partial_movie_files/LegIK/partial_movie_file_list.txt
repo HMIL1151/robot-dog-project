@@ -1,7 +1,4 @@
 # This file is used internally by FFMPEG.
-file 'file:C:/Users/harrison.milburn/repos/robot-dog-project/Animations/Inverse Kinematics/media/videos/Leg_3D_IK/480p5/partial_movie_files/LegIK/472351218_3281802321_223132457.mp4'
-file 'file:C:/Users/harrison.milburn/repos/robot-dog-project/Animations/Inverse Kinematics/media/videos/Leg_3D_IK/480p5/partial_movie_files/LegIK/2840259739_2230675760_2726585880.mp4'
-file 'file:C:/Users/harrison.milburn/repos/robot-dog-project/Animations/Inverse Kinematics/media/videos/Leg_3D_IK/480p5/partial_movie_files/LegIK/2840259739_2260980458_2825481548.mp4'
-file 'file:C:/Users/harrison.milburn/repos/robot-dog-project/Animations/Inverse Kinematics/media/videos/Leg_3D_IK/480p5/partial_movie_files/LegIK/2840259739_2230675760_3048627443.mp4'
-file 'file:C:/Users/harrison.milburn/repos/robot-dog-project/Animations/Inverse Kinematics/media/videos/Leg_3D_IK/480p5/partial_movie_files/LegIK/3758863688_1884143980_632046963.mp4'
-file 'file:C:/Users/harrison.milburn/repos/robot-dog-project/Animations/Inverse Kinematics/media/videos/Leg_3D_IK/480p5/partial_movie_files/LegIK/1438545149_2230675760_65579310.mp4'
+file 'file:C:/Users/harrison.milburn/repos/robot-dog-project/Animations/Inverse Kinematics/media/videos/Leg_3D_IK/480p5/partial_movie_files/LegIK/1540861615_548731573_138669897.mp4'
+file 'file:C:/Users/harrison.milburn/repos/robot-dog-project/Animations/Inverse Kinematics/media/videos/Leg_3D_IK/480p5/partial_movie_files/LegIK/926947279_1884143980_2626871496.mp4'
+file 'file:C:/Users/harrison.milburn/repos/robot-dog-project/Animations/Inverse Kinematics/media/videos/Leg_3D_IK/480p5/partial_movie_files/LegIK/1438545149_2230675760_4178138113.mp4'
