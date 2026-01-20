@@ -10,6 +10,20 @@ import constants
 gc.collect()
 
 koda = Robot()
+
+position = (constants.ZERO_X, constants.ZERO_Y, constants.ZERO_Z)
+a = 0
+div = 1
+max = 30
+while True:
+    position = (constants.ZERO_X , constants.ZERO_Y, constants.ZERO_Z+a)
+    koda.manual_position_control((position, position, position, position))
+
+    a = a + (0.4 * div)
+    if a > max or a < -max:
+        div = div * -1
+        
+
 koda.stand()
 
 koda.set_speed(Speed.in_mm_per_second(20))

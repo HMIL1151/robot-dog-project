@@ -18,48 +18,15 @@ def inverse_kinematics(point):
     thigh_length = constants.THIGH_LENGTH_MM
     calf_length = constants.CALF_LENGTH_MM
 
-    foot_to_hip_z_distance_mm = hip_seperation_mm/2 - z
+    q = hip_seperation_mm/2 - z
+    a = 31.56
 
-    b = -2*a*math.cos(foot_legservo_hipservo_theta)
-    c = math.pow(a, 2) - math.pow(y, 2) - math.pow(foot_to_hip_z_distance_mm, 2)
+    y_prime = math.sqrt(math.pow(q, 2) + math.pow(y, 2) - math.pow(a, 2))
+    theta_h = math.pi - math.atan(y/q) - math.atan(y_prime/a)
 
-    # Solve quadratic equation x^2 + b*x + c = 0
-    discriminant = b**2 - 4*1*c
-    if discriminant < 0:
-        raise ValueError("No real roots found")
-    root1 = (-b + math.sqrt(discriminant)) / 2
-    root2 = (-b - math.sqrt(discriminant)) / 2
-    positive_roots = [r for r in (root1, root2) if r > 0]
-    if not positive_roots:
-        raise ValueError("No positive roots found")
-    y_prime = float(positive_roots[0])
-    print("y_prime: {:.2f}".format(y_prime))
+    # print("y':", y_prime)
+    # print("theta_h (deg):", math.degrees(theta_h))
 
-    v = math.sqrt(math.pow(y, 2) + math.pow(foot_to_hip_z_distance_mm, 2))
-    if z < hip_seperation_mm/2:
-        theta_a_prime = math.atan(y/foot_to_hip_z_distance_mm)
-    elif z > hip_seperation_mm/2:
-        theta_a_prime = math.atan((z-hip_seperation_mm/2)/y) + math.pi/2
-    else:
-        theta_a_prime = math.pi/2
-    theta_a_prime_prime = math.acos((math.pow(a, 2) + math.pow(v, 2) - math.pow(y_prime, 2)) / (2*a*v))
-    theta_a = theta_a_prime + theta_a_prime_prime
-
-    f = math.sqrt(math.pow(foot_to_hip_z_distance_mm, 2) + math.pow(a, 2) - 2*a*foot_to_hip_z_distance_mm*math.cos(theta_a))
-
-    if z > constants.ZERO_Z - 0.1 and z < constants.ZERO_Z + 0.1:
-        theta_h = 0
-    else:
-        theta_h = math.acos((math.pow(y, 2) + math.pow(y_prime, 2) - math.pow(f, 2)) / (2*y*y_prime))
-
-    if z > (hip_seperation_mm/2 + a*math.sin(math.pi - foot_legservo_hipservo_theta)):
-        theta_h = -theta_h
-    elif z < (hip_seperation_mm/2 + a*math.sin(math.pi - foot_legservo_hipservo_theta)):
-        theta_h = theta_h
-    else:
-        theta_h = 0
-        
-    #print(f"theta_h: {math.degrees(theta_h):.2f}")
 
     theta_h = math.degrees(theta_h)
 

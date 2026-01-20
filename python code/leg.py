@@ -71,4 +71,4 @@ class Leg:
         else:
             hip_servo = hip_angle
 
-        return (hip_servo, left_servo, right_servo)
+        return (hip_servo+180, left_servo, right_servo)

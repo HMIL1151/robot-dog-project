@@ -102,9 +102,9 @@ class Robot:
     def manual_position_control(self, positions):
         front_left_position, front_right_position, rear_right_position, rear_left_position = positions
         self.front_left_leg.manual_position_control(front_left_position)
-        self.front_right_leg.manual_position_control(front_right_position)
-        self.rear_left_leg.manual_position_control(rear_left_position)
-        self.rear_right_leg.manual_position_control(rear_right_position)
+        # self.front_right_leg.manual_position_control(front_right_position)
+        # self.rear_left_leg.manual_position_control(rear_left_position)
+        # self.rear_right_leg.manual_position_control(rear_right_position)
 
     def deactivate_all_hips(self):
         self.front_left_leg.deactivate_hip()
