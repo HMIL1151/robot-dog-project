@@ -11,6 +11,7 @@ hipSeperation = 160
 servoAxisDistance = 31.56
 footZ = 10
 footY = 125
+footX = 30
 
 arcRadii = 10
 
@@ -31,7 +32,110 @@ def createRelativePoint(robotOrigin:Dot, x, y):
 
         return Dot(point=[originX - xDisplay, originY - yDisplay, 0])
 
-def dimension_arrow_from_line(
+def getIntersections(footX, footY):
+    foot_coords = (footX, footY)
+    servo1_coords = (-servoDistance/2, 0)
+    servo2_coords = (servoDistance/2, 0)
+
+    foot_circle = (foot_coords, calfLength)
+    thigh_circle_1 = (servo1_coords, thighLength)
+    thigh_circle_2 = (servo2_coords, thighLength)
+
+    def intersection_between_circles(circle1, circle2):
+        # Unpack circle1 and circle2
+        ((x1, y1), r1) = circle1
+        ((x2, y2), r2) = circle2
+
+        # Calculate the distance between the centers
+        dx = x2 - x1
+        dy = y2 - y1
+        distance = math.sqrt(math.pow(dx, 2) + math.pow(dy, 2))
+
+        intersection_coords = []
+
+        # Check if circles intersect
+        if distance < r1 + r2 and distance > 0:
+            # Calculate intersection points (simplified)
+
+            a = (math.pow(r1, 2) - math.pow(r2, 2) + math.pow(distance, 2)) / (2 * distance)
+            if (math.pow(r1, 2) - math.pow(a, 2)) < 0:
+                return intersection_coords
+            h = math.sqrt(math.pow(r1, 2) - math.pow(a, 2))
+            x5 = x1 + a/distance * dx
+            y5 = y1 + a/distance * dy
+
+            x3 = x5 - h/distance * dy
+            y3 = y5 + h/distance * dx
+            intersection_coords.append((x3, y3))
+
+            x4 = x5 + h/distance * dy
+            y4 = y5 - h/distance * dx
+            intersection_coords.append((x4, y4))
+
+        return intersection_coords
+
+    def clockwise_angle_between_two_lines(point1, point2, intersection_point):
+
+        x1, y1 = point1
+        x2, y2 = point2
+        xi, yi = intersection_point
+
+        v1x, v1y = x1 - xi, y1 - yi
+        v2x, v2y = x2 - xi, y2 - yi
+
+        theta1 = math.atan2(v1y, v1x)
+        theta2 = math.atan2(v2y, v2x)
+
+        delta_cw = theta1 - theta2
+        delta_cw = (delta_cw + 2 * math.pi) % (2 * math.pi)
+        return math.degrees(delta_cw)
+
+    def counterclockwise_angle_between_two_lines(point1, point2, intersection_point):
+        x1, y1 = point1
+        x2, y2 = point2
+        xi, yi = intersection_point
+
+        v1x, v1y = x1 - xi, y1 - yi
+        v2x, v2y = x2 - xi, y2 - yi
+
+        theta1 = math.atan2(v1y, v1x)
+        theta2 = math.atan2(v2y, v2x)
+
+        delta_ccw = theta2 - theta1
+        delta_ccw = (delta_ccw + 2 * math.pi) % (2 * math.pi)
+        return math.degrees(delta_ccw)
+    
+
+    servo1_intersection_coords = intersection_between_circles(foot_circle, thigh_circle_1)
+    servo2_intersection_coords = intersection_between_circles(foot_circle, thigh_circle_2)
+
+    if servo1_intersection_coords and servo2_intersection_coords:
+
+        servo1_intersection_angles = (
+            clockwise_angle_between_two_lines(servo1_coords, foot_coords, servo1_intersection_coords[0]),
+            clockwise_angle_between_two_lines(servo1_coords, foot_coords, servo1_intersection_coords[1])
+        )
+        servo2_intersection_angles = (
+            clockwise_angle_between_two_lines(servo2_coords, foot_coords, servo2_intersection_coords[0]),
+            clockwise_angle_between_two_lines(servo2_coords, foot_coords, servo2_intersection_coords[1])
+        )
+
+        if servo1_intersection_angles[0] < 180:
+            leftServoIntersectionPoint = servo1_intersection_coords[1]
+        else:
+            leftServoIntersectionPoint = servo1_intersection_coords[0]
+
+        if servo2_intersection_angles[0] < 180:
+            rightServoIntersectionPoint = servo2_intersection_coords[0]
+        else:
+            rightServoIntersectionPoint = servo2_intersection_coords[1]
+
+    else:
+        raise ValueError("No Intersection Points")
+    
+    return leftServoIntersectionPoint, rightServoIntersectionPoint
+
+def getDimensionArrowFromLine(
     line: Line,
     offset: float = 0.4,
     buff: float = 0.0,
@@ -100,24 +204,24 @@ class HipAxisView(Scene):
         leg = Line(knee.get_center(), foot.get_center())
         servoShaft = Line(servoCentre.get_center(), knee.get_center())
 
-        legArrow = dimension_arrow_from_line(leg, color=RED, offset=-0.4)
+        legArrow = getDimensionArrowFromLine(leg, color=RED, offset=-0.4)
         legArrowLabel = MathTex('b', color=RED).move_to(legArrow.get_midpoint() + LEFT*0.2 + DOWN*0.2)
-        servoShaftArrow = dimension_arrow_from_line(servoShaft, offset=-0.2, stroke_color=LIGHT_PINK)
+        servoShaftArrow = getDimensionArrowFromLine(servoShaft, offset=-0.2, stroke_color=LIGHT_PINK)
         servoShaftLabel = MathTex('a', color=LIGHT_PINK).move_to(servoShaftArrow.get_midpoint() + UP*0.4)
         yDashedLine = DashedLine(foot.get_center(), [foot.get_center()[0], legOrigin.get_center()[1], 0])
         zDashedLine = DashedLine(foot.get_center(), [legOrigin.get_center()[0], foot.get_center()[1], 0])
 
         hipSeperationDashedLine = DashedLine(servoCentre.get_center(), legOrigin.get_center())
-        hipSeperationArrow = dimension_arrow_from_line(hipSeperationDashedLine, offset=0.2)
+        hipSeperationArrow = getDimensionArrowFromLine(hipSeperationDashedLine, offset=0.2)
         hipSeperationLabel = MathTex('d/2').move_to(hipSeperationArrow.get_midpoint() + UP*0.3 + RIGHT*0.2)
 
         qLine = Line(servoCentre.get_center(), [foot.get_center()[0], legOrigin.get_center()[1], 0])
-        qArrow = dimension_arrow_from_line(qLine, offset=0.2, stroke_color=YELLOW)
+        qArrow = getDimensionArrowFromLine(qLine, offset=0.2, stroke_color=YELLOW)
         qLineLabel = MathTex('q', color=YELLOW).next_to(qArrow, UP*0.4)
         
-        yArrow = dimension_arrow_from_line(yDashedLine, offset=-0.4, stroke_color=MAROON_A)
+        yArrow = getDimensionArrowFromLine(yDashedLine, offset=-0.4, stroke_color=MAROON_A)
         yLabel = MathTex('y', color=MAROON_A).next_to(yArrow, RIGHT*0.4)
-        zArrow = dimension_arrow_from_line(zDashedLine, offset=0.2, stroke_color=TEAL).shift(UP * convertDistance(footY))
+        zArrow = getDimensionArrowFromLine(zDashedLine, offset=0.2, stroke_color=TEAL).shift(UP * convertDistance(footY))
         zLabel = MathTex('z', color=TEAL).next_to(zArrow, UP*0.4)
 
         fLine = DashedLine(foot.get_center(), servoCentre.get_center())
@@ -429,4 +533,117 @@ class HipAxisView(Scene):
         
         
         return
+
+class FrontView(Scene):
+     def construct(self):
+          servoCentrePoint = Dot(manim.ORIGIN + UP *3, color=BLUE)
+          servoLeftCentre = Dot(color=GREEN).move_to(servoCentrePoint.get_center() + LEFT * (convertDistance(servoDistance)/2))
+          servoRightCentre = Dot(color=GREEN).move_to(servoCentrePoint.get_center() + RIGHT * (convertDistance(servoDistance)/2))
+          foot = Dot(color=RED).move_to(servoCentrePoint.get_center() + RIGHT * convertDistance(footX) + DOWN * convertDistance(footY))
+
+          intersectionPoints = getIntersections(-footX, footY)
+          rightServoIntersectionPoint = Dot(color=YELLOW).move_to(servoCentrePoint.get_center() + LEFT * convertDistance(intersectionPoints[0][0]) + DOWN * convertDistance(intersectionPoints[0][1])).set_z_index(100)
+          leftServoIntersectionPoint = Dot(color=YELLOW).move_to(servoCentrePoint.get_center() + LEFT * convertDistance(intersectionPoints[1][0]) + DOWN * convertDistance(intersectionPoints[1][1])).set_z_index(100)
+          
+          leftThigh = Line(servoLeftCentre.get_center(), leftServoIntersectionPoint.get_center(), color=GREEN)
+          rightThigh = Line(servoRightCentre.get_center(), rightServoIntersectionPoint.get_center(), color=GREEN)
+
+          leftCalf = Line(foot.get_center(), leftServoIntersectionPoint.get_center(), color=RED)
+          rightCalf = Line(foot.get_center(), rightServoIntersectionPoint.get_center(), color=RED)
+
+          dashLength = 0.2
+          def getNumDashes(radius):
+              cirumference = math.pi * 2 * radius
+              return int(cirumference / (2 * dashLength))
+          
+          servoNumDashes = getNumDashes(convertDistance(thighLength))
+          footNumDashed = getNumDashes(convertDistance(calfLength))
+
+          leftServoCircle = DashedVMobject(Circle(convertDistance(thighLength), color=GREEN), num_dashes=servoNumDashes).move_to(servoLeftCentre.get_center())
+          rightServoCircle = DashedVMobject(Circle(convertDistance(thighLength), color=GREEN), num_dashes=servoNumDashes).move_to(servoRightCentre.get_center())
+          footCircle = DashedVMobject(Circle(convertDistance(calfLength), color=RED), num_dashes=footNumDashed).move_to(foot.get_center())
+
+          rightCalfArrow = getDimensionArrowFromLine(rightCalf, color=RED, offset=-0.2, max_tip_length_to_length_ratio=0.02)
+          rightCalfLabel = MathTex('R', color=RED).move_to(rightCalfArrow.get_midpoint() + RIGHT*0.2 + DOWN*0.2)
+
+          leftCalfArrow = getDimensionArrowFromLine(leftCalf, color=RED, offset=0.2, max_tip_length_to_length_ratio=0.02)
+          leftCalfLabel = MathTex('R', color=RED).move_to(leftCalfArrow.get_midpoint() + LEFT*0.3 + DOWN*0.2)
+
+          rightThighArrow = getDimensionArrowFromLine(rightThigh, color=GREEN, offset=0.2)
+          rightThighLabel = MathTex('r', color=GREEN).move_to(rightThighArrow.get_midpoint() + RIGHT*0.1 + UP*0.2)
+
+          leftThighArrow = getDimensionArrowFromLine(leftThigh, color=GREEN, offset=-0.2)
+          leftThighLabel = MathTex('r', color=GREEN).move_to(leftThighArrow.get_midpoint() + LEFT*0.2 + UP*0.2)
+
+          topYDashedLine = DashedLine(servoCentrePoint.get_center(), servoCentrePoint.get_center() + LEFT*5)
+          bottomYDashedLine = DashedLine(foot.get_center(), [topYDashedLine.end[0], foot.get_center()[1], 0])
+          yArrow = DoubleArrow(topYDashedLine.end, bottomYDashedLine.end, stroke_width=3, tip_shape=StealthTip, tip_shape_start=StealthTip, buff=0)
+          yLabel = MathTex('y_f').move_to(yArrow.get_midpoint() + LEFT*0.3)
+
+          leftXDashedLine = DashedLine(servoCentrePoint.get_center(), servoCentrePoint.get_center() + DOWN*6.5)
+          rightXDashedLine = DashedLine(foot.get_center(), [foot.get_center()[0], leftXDashedLine.end[1], 0])
+          xArrow = DoubleArrow(leftXDashedLine.end, rightXDashedLine.end, stroke_width=3, tip_shape=StealthTip, tip_shape_start=StealthTip, buff=0)
+          xLabel = MathTex('x_f').move_to(xArrow.get_midpoint() + DOWN * 0.3)
+
+          axesLength = 1
+          originXArrow = Arrow(servoCentrePoint.get_center(), servoCentrePoint.get_center() + RIGHT * axesLength, stroke_width=3, tip_shape=StealthTip, buff=0)
+          originYArrow = Arrow(servoCentrePoint.get_center(), servoCentrePoint.get_center() + DOWN * axesLength, stroke_width=3, tip_shape=StealthTip, buff=0)
+          originXLabel = MathTex('x').move_to(originXArrow.end + RIGHT*0.2)
+          originYLabel = MathTex('y').move_to(originYArrow.end + DOWN*0.2)
+          originCoords = MathTex('(0, 0)').move_to(servoCentrePoint.get_center() + UP*0.3).scale(0.75)
+          leftServoUpDashedLine = DashedLine(servoLeftCentre.get_center(), servoLeftCentre.get_center() + UP*0.5)
+          rightServoUpDashedLine = DashedLine(servoRightCentre.get_center(), servoRightCentre.get_center() + UP*0.5)
+          servoDistanceArrow = DoubleArrow(leftServoUpDashedLine.end, rightServoUpDashedLine.end, stroke_width=3, buff=0, tip_shape=StealthTip, tip_shape_start=StealthTip)
+          servoDistanceLabel = MathTex('d').move_to(servoDistanceArrow.get_midpoint() + UP*0.3)
+
+          leftServoCoords = MathTex(r'\left(-\frac{d}{2},\ 0\right)').move_to(servoLeftCentre.get_center() + UP*0.3).scale(0.75)
+          rightServoCoords = MathTex(r'\left(\frac{d}{2},\ 0\right)').move_to(servoRightCentre.get_center() + UP*0.3).scale(0.75)
+          footCoords = MathTex('(x_f, y_f)').move_to(foot.get_center() + DOWN*0.3).scale(0.75)
+
+          
+          self.add(servoCentrePoint,
+                   servoLeftCentre, 
+                   servoRightCentre,
+                   foot,
+                   leftServoIntersectionPoint,
+                   rightServoIntersectionPoint,
+                   leftThigh, 
+                   rightThigh,
+                   leftCalf,
+                   rightCalf,
+                   leftServoCircle,
+                   rightServoCircle,
+                   footCircle,
+                   rightCalfArrow,
+                   rightCalfLabel,
+                   rightThighArrow,
+                   rightThighLabel,
+                   leftThighArrow,
+                   leftThighLabel,
+                   leftCalfArrow,
+                   leftCalfLabel,
+                   topYDashedLine,
+                   bottomYDashedLine,
+                   yArrow,
+                   yLabel,
+                   leftXDashedLine,
+                   rightXDashedLine,
+                   xArrow,
+                   xLabel,
+                   originXArrow,
+                   originYArrow,
+                   originXLabel,
+                   originYLabel,
+                   originCoords,
+                   leftServoUpDashedLine,
+                   rightServoUpDashedLine,
+                   servoDistanceArrow,
+                   servoDistanceLabel,
+                   leftServoCoords,
+                   rightServoCoords,
+                   footCoords
+                   )
+          
+          self.wait(2)
+
 
