@@ -11,7 +11,7 @@ hipSeperation = 160
 servoAxisDistance = 31.56
 footZ = 10
 footY = 125
-footX = 30
+footX = 0
 
 arcRadii = 10
 
@@ -178,24 +178,7 @@ def getDimensionArrowFromLine(
     else:
         return arrow
 
-def dashed_arc(start_angle, angle, radius, arc_center, dash_length=0.2, gap_length=0.1, min_angle=1e-4):
-    total_angle = max(abs(angle), min_angle)
-    arc_length = radius * total_angle
-    pattern_length = dash_length + gap_length
-    n_dashes = int(arc_length // pattern_length)
-    dashes = VGroup()
-    for i in range(n_dashes):
-        dash_start = start_angle + i * pattern_length / radius * np.sign(angle)
-        dash_angle = dash_length / radius * np.sign(angle)
-        if abs(dash_start - start_angle) + abs(dash_angle) > abs(angle):
-            break
-        dashes.add(Arc(
-            start_angle=dash_start,
-            angle=dash_angle,
-            radius=radius,
-            arc_center=arc_center
-        ))
-    return dashes
+
 
 class HipAxisView(Scene):
     def construct(self):
@@ -558,14 +541,25 @@ class FrontView(Scene):
           footXVal = ValueTracker(0)
           footYVal = ValueTracker(footY)
 
+          dashLength = 0.2
+          def getNumDashes(radius):
+              cirumference = math.pi * 2 * radius
+              return int(cirumference / (2 * dashLength))
+          
+          servoNumDashes = getNumDashes(convertDistance(thighLength))
+          footNumDashed = getNumDashes(convertDistance(calfLength))
+
           foot = always_redraw(lambda:
               Dot(color=RED).move_to(servoCentrePoint.get_center() + RIGHT * convertDistance(footXVal.get_value()) + DOWN * convertDistance(footYVal.get_value()))
           )
 
+          staticFoot = Dot(color=PINK).move_to(servoCentrePoint.get_center() + RIGHT * convertDistance(footX) + DOWN * convertDistance(footY))
+          staticFootCircle = DashedVMobject(Circle(convertDistance(calfLength), color=RED), num_dashes=footNumDashed).move_to(staticFoot.get_center())
+
           intersectionPoints = getAllIntersectionPoints(footXVal.get_value(), footYVal.get_value(), servoCentrePoint.get_center())
 
           leftServoIntersectionPoint = intersectionPoints[1]
-          rightServoIntersectionPoint = intersectionPoints[0]
+          rightServoIntersectionPoint = intersectionPoints[2]
 
           leftThigh = always_redraw(
               lambda: Line(leftServoCentre.get_center(), leftServoIntersectionPoint.get_center(), color=GREEN))
@@ -595,13 +589,7 @@ class FrontView(Scene):
                   rightServoIntersectionPoint = dot
 
           
-          dashLength = 0.2
-          def getNumDashes(radius):
-              cirumference = math.pi * 2 * radius
-              return int(cirumference / (2 * dashLength))
           
-          servoNumDashes = getNumDashes(convertDistance(thighLength))
-          footNumDashed = getNumDashes(convertDistance(calfLength))
 
 
           footCircle = always_redraw(lambda:
@@ -612,20 +600,27 @@ class FrontView(Scene):
           rightServoCircle = DashedVMobject(Circle(convertDistance(thighLength), color=GREEN), num_dashes=servoNumDashes).move_to(rightServoCentre.get_center())
 
 
-          self.add(leftServoCentre, leftThigh)
+          def getSweepStartingAngle(sweep):
+              vector = sweep.get_end() - sweep.get_start()
+              angle = np.arctan2(vector[1], vector[0])
+              return angle
+          
+          leftThighStartingAngle = getSweepStartingAngle(leftThigh)
+          rightThighStartingAngle = getSweepStartingAngle(rightThigh)
+          footStartingAngle = getSweepStartingAngle(leftCalf)
 
-          vector = leftThigh.get_end() - leftThigh.get_start()
-          angle = np.arctan2(vector[1], vector[0])
+          
 
           arc_progress = ValueTracker(0)
           total_angle = -2 * PI  # or whatever sweep you want
 
-          def progressive_dashed_arc():
+          def progressive_dashed_arc(arcRadius, arcCentre, startingAngle):
+            print(startingAngle)
             progress = arc_progress.get_value()
             dash_length = dashLength
             gap_length = dashLength
-            radius = convertDistance(thighLength)
-            start_angle = angle
+            radius = convertDistance(arcRadius)
+            start_angle = startingAngle
             sweep_angle = progress * total_angle
             sign = np.sign(sweep_angle) if sweep_angle != 0 else 1
             arc_len = abs(sweep_angle) * radius
@@ -645,32 +640,44 @@ class FrontView(Scene):
                     start_angle=dash_start_angle,
                     angle=dash_angle,
                     radius=radius,
-                    arc_center=leftServoCentre.get_center()
+                    arc_center=arcCentre
                 ))
                 angle_drawn += pattern_length
             return dashes
 
-          sweeping_arc = always_redraw(progressive_dashed_arc)
-          self.add(sweeping_arc)
+          leftServoDashedArc = always_redraw(lambda: progressive_dashed_arc(thighLength, leftServoCentre.get_center(), leftThighStartingAngle))
+          rightServoDashedArc = always_redraw(lambda: progressive_dashed_arc(thighLength, rightServoCentre.get_center(), rightThighStartingAngle))
+        #   footDashedArc = always_redraw(lambda: progressive_dashed_arc(calfLength, staticFoot.get_center(), footStartingAngle))
+
+          self.play(Create(rightServoCentre),
+                    Create(leftServoCentre)
+                    )
+          
+          self.play(Create(leftThigh),
+                    Create(rightThigh)
+                    )
+          
+          self.play(Create(foot))
+          
+          self.play(Create(leftCalf),
+                    Create(rightCalf)
+                    )
+          
+          
+          self.add(staticFoot)
+          self.remove(foot)
+
+          self.add(leftServoDashedArc, rightServoDashedArc)#, footDashedArc)
+          
           self.play(
             Rotate(leftThigh, total_angle, about_point=leftThigh.get_start()),
+            Rotate(rightThigh, total_angle, about_point=rightThigh.get_start()),
+            Rotate(staticFoot, total_angle, about_point=foot.get_start()),
             arc_progress.animate.set_value(1),
             run_time=10
         )
 
-        #   self.play(Create(rightServoCentre),
-        #             Create(leftServoCentre)
-        #             )
           
-        #   self.play(Create(leftThigh),
-        #             Create(rightThigh)
-        #             )
-          
-        #   self.play(Create(leftCalf),
-        #             Create(rightCalf)
-        #             )
-          
-        #   self.play(Create(foot))
 
 
           
