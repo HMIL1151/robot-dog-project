@@ -8,6 +8,18 @@ class Leg:
         self.hip_servo = Servo(hipServoNum)
         self.left_servo = Servo(frontServoNum)
         self.right_servo = Servo(rearServoNum)
+        self.sideStr = ""
+        self.faceStr = ""
+        if side == -1:
+            self.sideStr = "LEFT"
+        else:
+            self.sideStr = "RIGHT"
+
+        if face == 1:
+            self.faceStr = "FRONT"
+        else:
+            self.faceStr = "REAR"
+
         self.side = side
         self.face = face
         self.enable()
@@ -51,7 +63,7 @@ class Leg:
         servo_angles = inverse_kinematics.inverse_kinematics(position)
         servo_commands = self.kinematic_angles_to_servo_angles(servo_angles)
 
-        print(servo_commands)
+        print(f"{self.sideStr=}, {self.faceStr=} {servo_commands=}")
 
         self.hip_servo.value(servo_commands[0])
         self.left_servo.value(servo_commands[1])
@@ -63,12 +75,14 @@ class Leg:
     def kinematic_angles_to_servo_angles(self, kinematic_angles):
         hip_angle, left_angle, right_angle = kinematic_angles
 
+        #print(f"{self.sideStr=}, {self.faceStr=}, {hip_angle=}")
+
         left_servo = (right_angle - SERVO_OFFSET_DEG) * self.side
         right_servo = (left_angle - SERVO_OFFSET_DEG) * -self.side
 
         if (self.side * self.face < 0):
-            hip_servo = -hip_angle
+            hip_servo = -hip_angle + 180
         else:
-            hip_servo = hip_angle
+            hip_servo = hip_angle - 180
 
-        return (hip_servo+180, left_servo, right_servo)
+        return (hip_servo, left_servo, right_servo)
